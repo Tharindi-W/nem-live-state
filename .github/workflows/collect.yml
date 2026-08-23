@@ -2,10 +2,22 @@ name: Collect AEMO data
 
 # Always-on replacement for the Windows scheduled task: a laptop that sleeps
 # cannot be an archive. GitHub's cron is best-effort and often runs late under
-# load, so treat the cadence as "roughly every 10 minutes", not a guarantee.
+# load, so treat the cadence as approximate rather than guaranteed.
+#
+# Why 30 minutes and not 5. Actions bills a minimum of one minute per run, and a
+# private repo on the free plan gets 2,000 minutes a month. Every 5 minutes would
+# bill ~8,600 and every 10 would bill ~4,300 -- both blow the allowance and stop
+# partway through the month. Every 30 minutes bills ~1,440, which fits.
+#
+# This costs less than it looks like. The pre-dispatch feed returns a full
+# trailing DAY of 5-minute actuals on every call, so a 30-minute cadence still
+# captures every actual interval -- the collector backfills the gaps. What gets
+# sampled more coarsely is the forecast *vintage*: one issue per 30 minutes
+# instead of one per 5. If vintage granularity matters more than the bill, make
+# the repo public (Actions is free and unlimited there) and drop this to '*/5'.
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:
