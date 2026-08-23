@@ -83,6 +83,19 @@ function csvCell(v) {
 function appendRows(file, header, rows) {
   if (!rows.length) return 0;
   const fresh = !fs.existsSync(file);
+  // If the file already exists its header must match. Appending a widened schema
+  // under an old header silently misaligns every column from that point on, and
+  // the damage stays invisible until someone tries to model the data later.
+  if (!fresh) {
+    const nl = String.fromCharCode(10);
+    const existing = fs.readFileSync(file, "utf8").split(nl, 1)[0].trim();
+    const want = header.map(csvCell).join(",");
+    if (existing !== want) {
+      throw new Error("schema drift in " + path.basename(file) +
+        ": file header is" + nl + "  " + existing + nl + "but collector wants" + nl + "  " + want +
+        nl + "Migrate the file (or move it aside) before collecting.");
+    }
+  }
   let out = fresh ? header.map(csvCell).join(",") + "\n" : "";
   out += rows.map(r => r.map(csvCell).join(",")).join("\n") + "\n";
   fs.appendFileSync(file, out);
@@ -102,15 +115,38 @@ async function collectDispatch(state, latest) {
   const sd = rows[0] && rows[0].SETTLEMENTDATE;
   const st = state.dispatch || {};
   if (sd && sd === st.lastSD) { log(`dispatch: no new interval (${sd})`); return 0; }
-  const header = ["fetched_at", "SETTLEMENTDATE", "REGIONID", "PRICE", "TOTALDEMAND",
+  // PRICE_STATUS / APCFLAG / MARKETSUSPENDEDFLAG are the regime markers (firm vs
+  // administered pricing, market suspension). They are what separates a normal
+  // interval from the rare ones a forecast has to stay calibrated through, so
+  // they are archived even though they are constant almost all of the time.
+  const header = ["fetched_at", "SETTLEMENTDATE", "REGIONID", "PRICE", "PRICE_STATUS",
+    "APCFLAG", "MARKETSUSPENDEDFLAG", "TOTALDEMAND",
     "SCHEDULEDGENERATION", "SEMISCHEDULEDGENERATION", "NETINTERCHANGE"];
   const at = nowISO();
-  const out = rows.map(r => [at, r.SETTLEMENTDATE, r.REGIONID, r.PRICE, r.TOTALDEMAND,
+  const out = rows.map(r => [at, r.SETTLEMENTDATE, r.REGIONID, r.PRICE, r.PRICE_STATUS,
+    r.APCFLAG, r.MARKETSUSPENDEDFLAG, r.TOTALDEMAND,
     r.SCHEDULEDGENERATION, r.SEMISCHEDULEDGENERATION, r.NETINTERCHANGE]);
   const n = appendRows(path.join(DATA_DIR, "nem_dispatch.csv"), header, out);
+
+  // INTERCONNECTORFLOWS arrives as a JSON *string* nested inside each region row,
+  // one record per link with the flow and both directional limits. Flow against
+  // limit is constraint-binding proximity — the network state the price depends
+  // on — so it goes to its own long-format file rather than being discarded.
+  const icHeader = ["fetched_at", "SETTLEMENTDATE", "REGIONID", "INTERCONNECTORID",
+    "MWFLOW", "EXPORTLIMIT", "IMPORTLIMIT"];
+  const icRows = [];
+  for (const r of rows) {
+    let links = [];
+    try { links = JSON.parse(r.INTERCONNECTORFLOWS || "[]"); } catch (e) { continue; }
+    for (const l of links) {
+      icRows.push([at, r.SETTLEMENTDATE, r.REGIONID, l.name, l.value, l.exportlimit, l.importlimit]);
+    }
+  }
+  const ni = appendRows(path.join(DATA_DIR, "nem_interconnectors.csv"), icHeader, icRows);
+
   state.dispatch = { lastSD: sd };
-  log(`dispatch: +${n} rows @ ${sd}`);
-  return n;
+  log(`dispatch: +${n} rows, +${ni} interconnector rows @ ${sd}`);
+  return n + ni;
 }
 
 // 2) NEM Pre-dispatch — capture each new FORECAST vintage (tagged with issue time)

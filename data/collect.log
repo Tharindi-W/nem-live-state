@@ -298,3 +298,9 @@
 [2026-08-22T08:59:17.393Z] predispatch: +330 forecast rows, vintage 2026-08-22T19:00:00
 [2026-08-22T08:59:17.712Z] wem: no new interval (22/08/2026 07:55:00)
 [2026-08-22T08:59:17.717Z] run complete: 335 new rows across [dispatch, predispatch, wem]
+[2026-08-23T11:18:49.150Z] dispatch: +5 rows, +12 interconnector rows @ 2026-08-23T21:20:00
+[2026-08-23T11:18:49.303Z] predispatch: +310 forecast rows, vintage 2026-08-23T21:20:00
+[2026-08-23T11:18:49.635Z] wem: +288 rows, newest 23/08/2026 07:55:00
+[2026-08-23T11:18:49.643Z] run complete: 615 new rows across [dispatch, predispatch, wem]
+[2026-08-23T11:19:56.057Z] dispatch: no new interval (2026-08-23T21:20:00)
+[2026-08-23T11:19:56.065Z] run complete: 0 new rows across [dispatch]
