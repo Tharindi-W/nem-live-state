@@ -17,6 +17,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
 
 const DATA_DIR = path.join(__dirname, "data");
 const STATE_FILE = path.join(DATA_DIR, "_state.json");
@@ -25,6 +26,8 @@ const LATEST_FILE = path.join(DATA_DIR, "latest.json");
 const TIMEOUT_MS = 30000;
 const WEM_SEED_MAX = 288;          // on first run, seed at most this many WEM intervals
 const REGIONS = ["NSW1", "QLD1", "SA1", "TAS1", "VIC1"];
+// NEMWeb rejects the default Node fetch user-agent with 403
+const UA = "Mozilla/5.0 (compatible; aemo-collector/1.0)";
 
 /* ----------------------------- utilities ----------------------------- */
 function ensureDir() { fs.mkdirSync(DATA_DIR, { recursive: true }); }
@@ -100,6 +103,70 @@ function appendRows(file, header, rows) {
   out += rows.map(r => r.map(csvCell).join(",")).join("\n") + "\n";
   fs.appendFileSync(file, out);
   return rows.length;
+}
+
+
+// NEMWeb ships everything as single-entry zips. Rather than take a dependency,
+// read the local file header directly: signature, method, then raw-inflate.
+// Only stored (0) and deflate (8) appear in these files.
+function unzipSingle(buf) {
+  if (buf.readUInt32LE(0) !== 0x04034b50) throw new Error("not a zip");
+  const method = buf.readUInt16LE(8);
+  const compSize = buf.readUInt32LE(18);
+  const nameLen = buf.readUInt16LE(26);
+  const extraLen = buf.readUInt16LE(28);
+  const start = 30 + nameLen + extraLen;
+  const body = buf.subarray(start, start + compSize);
+  if (method === 0) return body.toString("utf8");
+  if (method === 8) return zlib.inflateRawSync(body).toString("utf8");
+  throw new Error("unsupported zip method " + method);
+}
+
+async function getBuffer(url) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  try {
+    // NEMWeb 403s the default fetch user-agent
+    const r = await fetch(url, { signal: ctrl.signal, headers: { "user-agent": UA } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return Buffer.from(await r.arrayBuffer());
+  } finally { clearTimeout(t); }
+}
+
+// List the .zip files in a NEMWeb CURRENT directory, oldest first. The IIS
+// listing prints each filename twice, so dedupe.
+async function nemwebList(dir, prefix) {
+  const html = await getText(dir, { headers: { "user-agent": UA } });
+  const names = new Set();
+  let i = 0;
+  for (;;) {
+    const at = html.indexOf(prefix, i);
+    if (at < 0) break;
+    const end = html.indexOf(".zip", at);
+    if (end < 0) break;
+    const name = html.slice(at, end + 4);
+    // a quoted href never contains whitespace or angle brackets; anything
+    // that does means we ran past the end of the attribute
+    if (!/[\s"'<>]/.test(name)) names.add(name);
+    i = end + 4;
+  }
+  return [...names].sort();
+}
+
+// AEMO's ".csv inside a zip" reports are MMS format: rows tagged I (header)
+// and D (data), with the header defining the columns for the D rows below it.
+function parseMMS(text) {
+  const out = [];
+  let cols = null;
+  for (const row of parseCSV(text)) {
+    if (row[0] === "I") cols = row;
+    else if (row[0] === "D" && cols) {
+      const o = {};
+      for (let i = 4; i < cols.length; i++) o[cols[i]] = row[i];
+      out.push(o);
+    }
+  }
+  return out;
 }
 
 /* ----------------------------- sources ----------------------------- */
@@ -235,8 +302,72 @@ async function collectSCADA(state, latest) {
   return n;
 }
 
+
+// 4) Rooftop PV — the generation nobody meters
+// Behind-the-meter solar is invisible in TOTALDEMAND, which makes it the
+// largest single source of demand-forecast error in the NEM. AEMO publishes
+// two independent ACTUAL streams for the same interval, SATELLITE (modelled
+// from Himawari imagery) and MEASUREMENT (from sampled real sites). The gap
+// between them is a free estimate-vs-truth label, so both are archived, and
+// the QI quality field is kept as a sample weight rather than dropped.
+const ROOFTOP_BASE = "https://nemweb.com.au/Reports/CURRENT/ROOFTOP_PV/";
+
+async function collectRooftopActual(state, latest) {
+  // The two variants must be tracked separately. Filenames sort by variant
+  // before they sort by time, so a single "newest N files" cursor over the
+  // combined listing silently returns only SATELLITE and drops MEASUREMENT --
+  // which is the half that makes the pair a label.
+  const header = ["fetched_at", "SOURCE", "INTERVAL_DATETIME", "REGIONID", "POWER", "QI", "LASTCHANGED"];
+  const at = nowISO();
+  const out = [];
+  let total = 0;
+  for (const variant of ["SATELLITE", "MEASUREMENT"]) {
+    const key = "rooftop_actual_" + variant.toLowerCase();
+    const files = await nemwebList(ROOFTOP_BASE + "ACTUAL/", "PUBLIC_ROOFTOP_PV_ACTUAL_" + variant + "_");
+    if (!files.length) { log(`rooftop_actual ${variant}: no files listed`); continue; }
+    const st = state[key] || {};
+    const fresh = files.filter(f => !st.lastFile || f > st.lastFile).slice(-6);
+    if (!fresh.length) { log(`rooftop_actual ${variant}: no new file`); continue; }
+    for (const f of fresh) {
+      const rows = parseMMS(unzipSingle(await getBuffer(ROOFTOP_BASE + "ACTUAL/" + f)));
+      for (const r of rows) {
+        out.push([at, variant, r.INTERVAL_DATETIME, r.REGIONID, r.POWER, r.QI, r.LASTCHANGED]);
+      }
+    }
+    state[key] = { lastFile: files[files.length - 1] };
+    total += fresh.length;
+  }
+  const n = appendRows(path.join(DATA_DIR, "nem_rooftop_actual.csv"), header, out);
+  latest.rooftop_actual = { fetched_at: at, files: total, rows: n };
+  log(`rooftop_actual: +${n} rows from ${total} file(s)`);
+  return n;
+}
+
+async function collectRooftopForecast(state, latest) {
+  const files = await nemwebList(ROOFTOP_BASE + "FORECAST/", "PUBLIC_ROOFTOP_PV_FORECAST_");
+  if (!files.length) { log("rooftop_forecast: no files listed"); return 0; }
+  const st = state.rooftop_forecast || {};
+  const newest = files[files.length - 1];
+  if (newest === st.lastFile) { log(`rooftop_forecast: no new vintage (${newest})`); return 0; }
+
+  // POWERPOELOW/POE50/POEHIGH make this a genuine distributional forecast, and
+  // VERSION_DATETIME is the vintage — keep both so it can be scored without leakage
+  const header = ["fetched_at", "VERSION_DATETIME", "INTERVAL_DATETIME", "REGIONID",
+    "POWERMEAN", "POWERPOE50", "POWERPOELOW", "POWERPOEHIGH", "LASTCHANGED"];
+  const at = nowISO();
+  const rows = parseMMS(unzipSingle(await getBuffer(ROOFTOP_BASE + "FORECAST/" + newest)));
+  const out = rows.map(r => [at, r.VERSION_DATETIME, r.INTERVAL_DATETIME, r.REGIONID,
+    r.POWERMEAN, r.POWERPOE50, r.POWERPOELOW, r.POWERPOEHIGH, r.LASTCHANGED]);
+  const n = appendRows(path.join(DATA_DIR, "nem_rooftop_forecast.csv"), header, out);
+  state.rooftop_forecast = { lastFile: newest };
+  latest.rooftop_forecast = { fetched_at: at, vintage: rows[0] && rows[0].VERSION_DATETIME, rows: n };
+  log(`rooftop_forecast: +${n} rows, vintage ${rows[0] && rows[0].VERSION_DATETIME}`);
+  return n;
+}
+
 /* ----------------------------- main ----------------------------- */
-const ALL = { dispatch: collectDispatch, predispatch: collectPredispatch, wem: collectWEM };
+const ALL = { dispatch: collectDispatch, predispatch: collectPredispatch, wem: collectWEM,
+  rooftop_actual: collectRooftopActual, rooftop_forecast: collectRooftopForecast };
 
 (async function main() {
   ensureDir();

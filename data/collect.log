@@ -304,3 +304,8 @@
 [2026-08-23T11:18:49.643Z] run complete: 615 new rows across [dispatch, predispatch, wem]
 [2026-08-23T11:19:56.057Z] dispatch: no new interval (2026-08-23T21:20:00)
 [2026-08-23T11:19:56.065Z] run complete: 0 new rows across [dispatch]
+[2026-08-23T23:40:54.030Z] rooftop_actual: +30 rows from 6 file(s)
+[2026-08-23T23:40:54.739Z] rooftop_forecast: +1865 rows, vintage 2026/08/24 09:30:00
+[2026-08-23T23:40:54.741Z] run complete: 1895 new rows across [rooftop_actual, rooftop_forecast]
+[2026-08-23T23:41:18.395Z] rooftop_actual: +60 rows from 12 file(s)
+[2026-08-23T23:41:18.399Z] run complete: 60 new rows across [rooftop_actual]

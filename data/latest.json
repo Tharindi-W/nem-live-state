@@ -3811,5 +3811,15 @@
       "Extracted At": "23/08/2026 08:21:04"
     }
   },
-  "_collected_at": "2026-08-23T11:19:56.060Z"
+  "_collected_at": "2026-08-23T23:41:18.396Z",
+  "rooftop_actual": {
+    "fetched_at": "2026-08-23T23:41:15.300Z",
+    "files": 12,
+    "rows": 60
+  },
+  "rooftop_forecast": {
+    "fetched_at": "2026-08-23T23:40:54.662Z",
+    "vintage": "2026/08/24 09:30:00",
+    "rows": 1865
+  }
 }
