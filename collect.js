@@ -238,6 +238,30 @@ async function collectPredispatch(state, latest) {
   const out = forecasts.map(r => [issue, at, r.SETTLEMENTDATE, r.REGIONID, r.RRP, r.TOTALDEMAND,
     r.NETINTERCHANGE, r.SCHEDULEDGENERATION, r.SEMISCHEDULEDGENERATION]);
   const n = appendRows(path.join(DATA_DIR, "nem_predispatch_forecast.csv"), header, out);
+
+  // The 5MIN feed hands back a full trailing DAY of 5-minute actuals (5 regions
+  // x 288) on every call, and this function was using them only to derive the
+  // issue timestamp before discarding them. Archiving them backfills any gap
+  // shorter than 24 h, which is what makes the forecast-vs-actual join dense
+  // enough to score -- without it the match rate sits near 10%.
+  const aHeader = ["SETTLEMENTDATE", "REGIONID", "RRP", "TOTALDEMAND",
+    "NETINTERCHANGE", "SCHEDULEDGENERATION", "SEMISCHEDULEDGENERATION"];
+  const aFile = path.join(DATA_DIR, "nem_actual_5min.csv");
+  const seen = new Set();
+  if (fs.existsSync(aFile)) {
+    for (const r of parseCSV(fs.readFileSync(aFile, "utf8")).slice(1)) {
+      if (r[0]) seen.add(r[0] + "|" + r[1]);
+    }
+  }
+  // no fetched_at column: these rows are backfill, so a collection timestamp
+  // would be misleading, and (SETTLEMENTDATE, REGIONID) is the natural key
+  const aRows = actuals
+    .filter(r => !seen.has(r.SETTLEMENTDATE + "|" + r.REGIONID))
+    .sort((x, y) => x.SETTLEMENTDATE.localeCompare(y.SETTLEMENTDATE))
+    .map(r => [r.SETTLEMENTDATE, r.REGIONID, r.RRP, r.TOTALDEMAND,
+      r.NETINTERCHANGE, r.SCHEDULEDGENERATION, r.SEMISCHEDULEDGENERATION]);
+  const na = appendRows(aFile, aHeader, aRows);
+  if (na) log(`predispatch: +${na} backfilled 5-min actual rows`);
   state.predispatch = { lastIssue: issue };
   log(`predispatch: +${n} forecast rows, vintage ${issue}`);
   return n;

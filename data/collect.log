@@ -309,3 +309,6 @@
 [2026-08-23T23:40:54.741Z] run complete: 1895 new rows across [rooftop_actual, rooftop_forecast]
 [2026-08-23T23:41:18.395Z] rooftop_actual: +60 rows from 12 file(s)
 [2026-08-23T23:41:18.399Z] run complete: 60 new rows across [rooftop_actual]
+[2026-08-23T23:49:33.141Z] predispatch: +1440 backfilled 5-min actual rows
+[2026-08-23T23:49:33.142Z] predispatch: +185 forecast rows, vintage 2026-08-24T09:50:00
+[2026-08-23T23:49:33.143Z] run complete: 185 new rows across [predispatch]

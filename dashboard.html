@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>NEM Live State</title>
+<style>
+  :root{
+    --bg:#f5fbff; --bg-grad:#fffdf8; --paper:#ffffff; --paper-2:#f8fbff;
+    --ink:#24324a; --ink-strong:#263b5f; --muted:#60708c;
+    --line:#dce7f3; --grid:#eef3f9; --axis:#98a6ba; --zero:#b9c8da;
+    --blue:#2f74d0;   --blue-soft:#eaf4ff;
+    --cyan:#34a7b6;   --cyan-soft:#e8f8fa;
+    --coral:#e87a63;  --coral-soft:#fff0ec;
+    --gold:#d9a227;   --gold-soft:#fff7df;
+    --green:#2b9a74;  --green-soft:#e9f8f2;
+    --violet:#7b72d8; --violet-soft:#f0efff;
+    --neg-band:#eef4fb; --spike-band:#fff4f0;
+    --code-bg:#0f2340; --code-ink:#cfe4ff;
+    --shadow:0 14px 40px rgba(70,104,142,.12); --radius:18px;
+  }
+  /* Written twice -- media query and explicit attribute -- so the manual
+     toggle wins in both directions, not just away from the system setting. */
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --bg:#0e1520; --bg-grad:#0b111a; --paper:#161f2d; --paper-2:#1c2637;
+    --ink:#e4ecf7; --ink-strong:#f3f7fd; --muted:#93a3bb;
+    --line:#2a3648; --grid:#243043; --axis:#7d8ca4; --zero:#4a5b74;
+    --blue:#5b9bf0;   --blue-soft:#16283f;
+    --cyan:#4fc6d4;   --cyan-soft:#123135;
+    --coral:#ff9b83;  --coral-soft:#3a2019;
+    --gold:#f0bc45;   --gold-soft:#33280c;
+    --green:#4cc296;  --green-soft:#12312a;
+    --violet:#9d95f0; --violet-soft:#241f3f;
+    --neg-band:#151f30; --spike-band:#2a1a17;
+    --code-bg:#050a12; --code-ink:#a8c6ea;
+    --shadow:0 14px 40px rgba(0,0,0,.45);
+  }}
+  :root[data-theme="dark"]{
+    --bg:#0e1520; --bg-grad:#0b111a; --paper:#161f2d; --paper-2:#1c2637;
+    --ink:#e4ecf7; --ink-strong:#f3f7fd; --muted:#93a3bb;
+    --line:#2a3648; --grid:#243043; --axis:#7d8ca4; --zero:#4a5b74;
+    --blue:#5b9bf0;   --blue-soft:#16283f;
+    --cyan:#4fc6d4;   --cyan-soft:#123135;
+    --coral:#ff9b83;  --coral-soft:#3a2019;
+    --gold:#f0bc45;   --gold-soft:#33280c;
+    --green:#4cc296;  --green-soft:#12312a;
+    --violet:#9d95f0; --violet-soft:#241f3f;
+    --neg-band:#151f30; --spike-band:#2a1a17;
+    --code-bg:#050a12; --code-ink:#a8c6ea;
+    --shadow:0 14px 40px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);background-image:linear-gradient(180deg,var(--bg) 0%,var(--bg-grad) 100%);
+    color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;}
+  .shell{width:min(1280px,calc(100% - 32px));margin:0 auto;}
+  a{color:var(--blue);}
+  header.top{padding:24px 0 8px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;
+    background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+  h1{margin:14px 0 6px;font-size:clamp(28px,4.4vw,42px);letter-spacing:-.03em;color:var(--ink-strong);line-height:1.03;}
+  .lede{margin:0;max-width:850px;color:var(--muted);font-size:clamp(14.5px,1.6vw,17px);}
+  .controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:18px 0 4px;}
+  .status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--line);}
+  .dot.live{background:var(--green);box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 18%,transparent);}
+  .dot.err{background:var(--coral);box-shadow:0 0 0 4px color-mix(in srgb,var(--coral) 18%,transparent);}
+  .dot.load{background:var(--gold);animation:pulse 1s infinite;}
+  @keyframes pulse{50%{opacity:.35;}}
+  button,.btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    padding:8px 14px;border-radius:10px;font-weight:650;font-size:13px;transition:.15s;}
+  button:hover{border-color:var(--blue);}
+  .toggle{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 0;border-bottom:1px solid var(--line);}
+  .tab{border:1px solid transparent;border-bottom:none;background:transparent;color:var(--muted);font-weight:750;
+    padding:10px 16px;border-radius:12px 12px 0 0;font-size:13.5px;position:relative;top:1px;text-align:left;}
+  .tab .sub{display:block;font-size:10.5px;font-weight:600;color:var(--axis);letter-spacing:.02em;}
+  .tab.active{background:var(--paper);border-color:var(--line);color:var(--ink-strong);}
+  .tab.active .sub{color:var(--blue);}
+  .panel{background:var(--paper);border:1px solid var(--line);border-top:none;
+    border-radius:0 0 var(--radius) var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:36px;}
+  .about{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-bottom:20px;}
+  .about .card{background:var(--blue-soft);border:1px solid var(--line);border-radius:14px;padding:15px 17px;}
+  .about h3{margin:0 0 6px;font-size:14.5px;color:var(--ink-strong);}
+  .about p{margin:0 0 8px;font-size:13.5px;color:var(--ink);}
+  .meta-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;}
+  .chip{font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--paper);
+    border:1px solid var(--line);color:var(--muted);}
+  .chip.warn{background:var(--gold-soft);border-color:var(--gold);color:var(--gold);}
+  .chip.ok{background:var(--green-soft);border-color:var(--green);color:var(--green);}
+  .chip.bad{background:var(--coral-soft);border-color:var(--coral);color:var(--coral);}
+  .endpoint{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;
+    background:var(--code-bg);color:var(--code-ink);padding:9px 11px;border-radius:9px;word-break:break-all;margin-top:6px;}
+  .endpoint .m{color:#7fe0a8;font-weight:700;}
+  .glossary{margin:0;padding:0;list-style:none;font-size:12.5px;}
+  .glossary li{padding:5px 0;border-bottom:1px dashed var(--line);color:var(--ink);}
+  .glossary li:last-child{border-bottom:none;}
+  .glossary code{background:var(--paper-2);color:var(--blue);padding:1px 6px;border-radius:5px;font-size:11.5px;font-weight:600;}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:11px;margin-bottom:20px;}
+  .kpi{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:13px 15px;}
+  .kpi .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800;}
+  .kpi .val{font-size:23px;font-weight:800;color:var(--ink-strong);margin-top:3px;letter-spacing:-.02em;}
+  .kpi .val small{font-size:12.5px;font-weight:700;color:var(--muted);}
+  .kpi .note{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .kpi.alert{border-color:var(--coral);background:var(--coral-soft);}
+  .charts{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .chart{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:15px 15px 10px;min-width:0;}
+  .chart.wide{grid-column:1/-1;}
+  .chart h4{margin:0 0 2px;font-size:13.5px;color:var(--ink-strong);}
+  .chart .cap{margin:0 0 10px;font-size:12px;color:var(--muted);}
+  .chart svg{display:block;width:100%;height:auto;overflow:visible;}
+  .legend{display:flex;flex-wrap:wrap;gap:11px;font-size:11.5px;color:var(--muted);margin:4px 2px 8px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .regionbar{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px;}
+  .regionbar button.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+  details.raw{margin-top:20px;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  details.raw summary{cursor:pointer;padding:11px 15px;font-weight:700;font-size:13px;color:var(--ink-strong);
+    background:var(--paper-2);list-style:none;}
+  details.raw summary::-webkit-details-marker{display:none;}
+  details.raw summary::before{content:"\25B8 ";color:var(--muted);}
+  details.raw[open] summary::before{content:"\25BE ";}
+  .tablewrap{overflow:auto;max-height:380px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;min-width:620px;}
+  th,td{text-align:right;padding:7px 10px;border-bottom:1px solid var(--grid);white-space:nowrap;}
+  th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--paper);}
+  thead th{position:sticky;top:0;background:var(--paper-2);color:var(--ink-strong);font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.04em;z-index:1;}
+  .rawjson{max-height:320px;overflow:auto;margin:0;padding:14px;background:var(--code-bg);color:var(--code-ink);
+    font-size:11px;line-height:1.5;font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre;}
+  .msg{padding:14px 16px;border-radius:12px;font-size:13.5px;margin-bottom:14px;}
+  .msg.err{background:var(--coral-soft);border:1px solid var(--coral);color:var(--ink);}
+  .msg.info{background:var(--gold-soft);border:1px solid var(--gold);color:var(--ink);}
+  .msg code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+    background:var(--paper);padding:2px 6px;border-radius:5px;}
+  .hint{font-size:12px;color:var(--muted);margin:2px 0 0;}
+  .note-strong{border-left:3px solid var(--gold);padding-left:12px;margin:14px 0;font-size:13px;color:var(--ink);}
+  footer{padding:8px 0 46px;color:var(--muted);font-size:12px;}
+  footer a{color:var(--muted);}
+  @media(max-width:900px){.about,.charts{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <span class="eyebrow" id="eyebrow">Step 0 &middot; Know the feeds before the model</span>
+    <h1>NEM Live State</h1>
+    <p class="lede">Live Australian electricity market data, with the fields that actually carry
+      forecasting signal surfaced rather than buried &mdash; constraint headroom, market regime flags,
+      the rooftop solar nobody meters, and weather sampled at the turbines instead of the city.</p>
+    <div class="controls">
+      <button id="refresh">&#8635; Refresh</button>
+      <label class="toggle"><input type="checkbox" id="auto"> Auto-refresh</label>
+      <button id="theme" title="Cycle theme">&#9681; Auto</button>
+      <div class="status"><span class="dot" id="dot"></span><span id="statusText">Idle</span></div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </header>
+  <div class="panel" id="panel"></div>
+  <footer>
+    Data &copy; AEMO, fetched live in your browser. Weather from
+    <a href="https://open-meteo.com" rel="noopener">Open-Meteo</a> (CC BY 4.0), ECMWF/GFS/ICON models.
+    <strong>Licensing:</strong> AEMO material is generally reusable with attribution &mdash; verify current terms
+    before commercial use. Bureau of Meteorology products are <em>not</em> licensed for commercial use, which is
+    why the BoM model is excluded from the default weather query.
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ===================== helpers ===================== */
+const $ = (s,r=document)=>r.querySelector(s);
+const fmt = (n,d=0)=> (n==null||isNaN(n))?"–":Number(n).toLocaleString("en-AU",{minimumFractionDigits:d,maximumFractionDigits:d});
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const REGIONS = ["NSW1","QLD1","SA1","TAS1","VIC1"];
+const REGION_COLORS = {NSW1:"var(--blue)",QLD1:"var(--gold)",SA1:"var(--coral)",TAS1:"var(--green)",VIC1:"var(--violet)"};
+
+/* NEM timestamps are AEST (UTC+10, no daylight saving) with no zone suffix.
+   Appending Z parses them consistently; the values are then comparable to each
+   other, which is all the arithmetic here needs. */
+const nemParse = s => Date.parse(String(s).replace(" ","T")+"Z");
+const hhmm = s => { const d=new Date(nemParse(s)); return String(d.getUTCHours()).padStart(2,"0")+":"+String(d.getUTCMinutes()).padStart(2,"0"); };
+
+function parseCSV(text){
+  const rows=[]; let i=0,f="",row=[],q=false;
+  while(i<text.length){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else{
+      if(c==='"') q=true;
+      else if(c===","){ row.push(f); f=""; }
+      else if(c==="\n"){ row.push(f); rows.push(row); f=""; row=[]; }
+      else if(c!=="\r") f+=c;
+    }
+    i++;
+  }
+  if(f.length||row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+
+/* ===================== prefs + routing ===================== */
+const PREFS_KEY = "nemlive.prefs";
+const prefs = Object.assign({tab:"now",region:"SA1",auto:false,theme:"auto",fullRange:false},
+  (()=>{ try{ return JSON.parse(localStorage.getItem(PREFS_KEY))||{}; }catch(e){ return {}; } })());
+function savePrefs(){ try{ localStorage.setItem(PREFS_KEY,JSON.stringify(prefs)); }catch(e){} }
+
+function applyTheme(){
+  const r=document.documentElement;
+  if(prefs.theme==="auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme",prefs.theme);
+  $("#theme").innerHTML = prefs.theme==="auto"?"◑ Auto":prefs.theme==="dark"?"● Dark":"○ Light";
+}
+
+/* ===================== scales ===================== */
+/* Linear inside +/-linthresh, log10 outside. A linear axis over -$1,000 to
+   $23,200 renders every ordinary price as the same pixel; a plain log axis
+   cannot show the ~31% of SA1 intervals that are negative. Symlog is the only
+   scale that shows both, so it is the default for price everywhere. */
+function symlog({linthresh=100,linscale=1}={}){
+  const L=linthresh,S=linscale;
+  return {
+    kind:"symlog", linthresh:L, linscale:S,
+    fwd(v){ if(v==null||isNaN(v)) return NaN; const s=v<0?-1:1,a=Math.abs(v);
+      return a<=L ? s*(a/L)*S : s*(S+Math.log10(a/L)); },
+    inv(u){ const s=u<0?-1:1,a=Math.abs(u);
+      return a<=S ? s*(a/S)*L : s*L*Math.pow(10,a-S); }
+  };
+}
+function linear(){ return {kind:"linear",fwd:v=>v,inv:u=>u}; }
+
+function niceTicks(lo,hi,n=5){
+  if(!(hi>lo)) return [lo];
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), norm=raw/mag;
+  const step=(norm<1.5?1:norm<3?2:norm<7?5:10)*mag;
+  const out=[]; for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step) out.push(+v.toFixed(10));
+  return out;
+}
+function symlogTicks(sc,lo,hi){
+  const out=new Set(), push=v=>{ if(v>=lo&&v<=hi) out.add(v); };
+  push(0); push(lo); push(hi);
+  const reach=Math.max(Math.abs(lo),Math.abs(hi));
+  for(let e=0;e<7;e++){
+    const d=sc.linthresh*Math.pow(10,e);
+    for(const m of [1,3]){ push(m*d); push(-m*d); }
+    if(d>reach*3) break;
+  }
+  return [...out].sort((a,b)=>a-b);
+}
+
+/* ===================== responsive chart plumbing ===================== */
+/* v2 drew every chart at a fixed 520-unit viewBox and let CSS stretch it, so
+   font-size 12 rendered at 24px on a wide screen and 8px on a phone. Measuring
+   the container and drawing at real pixel width makes one unit one pixel. */
+const _pending=new Set(); let _raf=0;
+const _ro = typeof ResizeObserver!=="undefined" ? new ResizeObserver(entries=>{
+  for(const e of entries) _pending.add(e.target);
+  if(_raf) return;
+  _raf=requestAnimationFrame(()=>{ _raf=0; for(const el of _pending){ if(el.__redraw) el.__redraw(); } _pending.clear(); });
+}) : null;
+
+function mountChart(el,draw,model){
+  el.__model=model;
+  el.__redraw=()=>{
+    const W=Math.max(280,Math.round(el.clientWidth||el.parentNode.clientWidth||560));
+    el.__W=W; draw(el,W,el.__model);
+  };
+  if(_ro && !el.__observed){ _ro.observe(el); el.__observed=true; }
+  el.__redraw();
+}
+
+const PAD={l:54,r:14,t:12,b:26};
+function plotBox(W,H){ return {l:PAD.l,r:PAD.r,t:PAD.t,b:PAD.b,pw:W-PAD.l-PAD.r,ph:H-PAD.t-PAD.b}; }
+
+function yAxisSVG(sc,lo,hi,W,H,fmtD=0,unit=""){
+  const p=plotBox(W,H), f0=sc.fwd(lo), f1=sc.fwd(hi);
+  const Y=v=>p.t+p.ph-(sc.fwd(v)-f0)/((f1-f0)||1)*p.ph;
+  const ticks = sc.kind==="symlog" ? symlogTicks(sc,lo,hi) : niceTicks(lo,hi,5);
+  let s="";
+  for(const v of ticks){
+    const y=Y(v); if(!isFinite(y)) continue;
+    const zero = Math.abs(v)<1e-9;
+    s+=`<line x1="${p.l}" y1="${y.toFixed(1)}" x2="${W-p.r}" y2="${y.toFixed(1)}" `
+     + `stroke="${zero?"var(--zero)":"var(--grid)"}" stroke-width="${zero?1.4:1}"/>`;
+    s+=`<text x="${p.l-7}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="10.5" fill="var(--axis)">${esc(fmt(v,fmtD))}${esc(unit)}</text>`;
+  }
+  return {svg:s,Y,p};
+}
+
+/* ===================== chart primitives ===================== */
+/* series: [{name,color,points:[{x,y}],dashedFrom}] ; x is a ms timestamp */
+function timeChart(el,W,model){
+  const {series,scale,unit,fmtD,bands} = model;
+  const H=Math.round(Math.min(340,Math.max(170,W*0.40)));
+  const all=series.flatMap(s=>s.points.map(pt=>pt.y)).filter(v=>v!=null&&!isNaN(v));
+  if(!all.length){ el.innerHTML=`<p class="hint">No data.</p>`; return; }
+  let lo=Math.min(...all), hi=Math.max(...all);
+  if(model.forceLo!=null) lo=Math.min(lo,model.forceLo);
+  if(model.forceHi!=null) hi=Math.max(hi,model.forceHi);
+  if(lo===hi){ lo-=1; hi+=1; }
+  const padv=(hi-lo)*0.08; lo-=padv; hi+=padv;
+  if(model.clampZero && lo>0) lo=0;
+
+  const xs=series.flatMap(s=>s.points.map(pt=>pt.x));
+  const x0=Math.min(...xs), x1=Math.max(...xs);
+  const p=plotBox(W,H);
+  const X=t=>p.l+(x1===x0?0:(t-x0)/(x1-x0))*p.pw;
+  const ax=yAxisSVG(scale,lo,hi,W,H,fmtD,unit);
+
+  let bandSVG="";
+  for(const b of (bands||[])){
+    const yTop=ax.Y(Math.min(b.to,hi)), yBot=ax.Y(Math.max(b.from,lo));
+    if(isFinite(yTop)&&isFinite(yBot)&&yBot>yTop)
+      bandSVG+=`<rect x="${p.l}" y="${yTop.toFixed(1)}" width="${p.pw}" height="${(yBot-yTop).toFixed(1)}" fill="${b.fill}" opacity="0.75"/>`;
+  }
+
+  let lines="";
+  for(const s of series){
+    const pts=s.points.filter(pt=>pt.y!=null&&!isNaN(pt.y));
+    if(!pts.length) continue;
+    const split = s.dashedFrom!=null ? pts.findIndex(pt=>pt.x>=s.dashedFrom) : -1;
+    const seg = arr => arr.map((pt,i)=>(i?"L":"M")+X(pt.x).toFixed(1)+" "+ax.Y(pt.y).toFixed(1)).join(" ");
+    if(split>0){
+      lines+=`<path d="${seg(pts.slice(0,split+1))}" fill="none" stroke="${s.color}" stroke-width="2"/>`;
+      lines+=`<path d="${seg(pts.slice(split))}" fill="none" stroke="${s.color}" stroke-width="2" stroke-dasharray="5 4" opacity="0.85"/>`;
+    } else {
+      lines+=`<path d="${seg(pts)}" fill="none" stroke="${s.color}" stroke-width="2"/>`;
+    }
+    const last=pts[pts.length-1];
+    lines+=`<circle cx="${X(last.x).toFixed(1)}" cy="${ax.Y(last.y).toFixed(1)}" r="3" fill="${s.color}"/>`;
+  }
+
+  let xlab="";
+  const nlab=Math.max(2,Math.min(7,Math.floor(p.pw/86)));
+  for(let i=0;i<nlab;i++){
+    const t=x0+(x1-x0)*i/(nlab-1), d=new Date(t);
+    const lbl=String(d.getUTCHours()).padStart(2,"0")+":"+String(d.getUTCMinutes()).padStart(2,"0");
+    xlab+=`<text x="${X(t).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10.5" fill="var(--axis)">${lbl}</text>`;
+  }
+  let nowLine="";
+  if(model.nowAt!=null && model.nowAt>=x0 && model.nowAt<=x1){
+    const nx=X(model.nowAt).toFixed(1);
+    nowLine=`<line x1="${nx}" y1="${p.t}" x2="${nx}" y2="${p.t+p.ph}" stroke="var(--gold)" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+  }
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${bandSVG}${ax.svg}${nowLine}${lines}${xlab}</svg>`;
+}
+
+/* Horizontal bars. diverging=true draws a zero rule and lets bars go left. */
+function barChart(el,W,model){
+  const {rows,unit,fmtD,diverging,scale} = model;
+  const rowH=26, H=PAD.t+PAD.b+rows.length*rowH;
+  const p=plotBox(W,H);
+  const sc = scale || linear();
+  const vals=rows.map(r=>r.value).filter(v=>v!=null&&!isNaN(v));
+  if(!vals.length){ el.innerHTML=`<p class="hint">No data.</p>`; return; }
+  let lo=Math.min(...vals,0), hi=Math.max(...vals,0);
+  if(!diverging) lo=Math.min(0,lo);
+  if(lo===hi){ hi=lo+1; }
+  const f0=sc.fwd(lo), f1=sc.fwd(hi);
+  const X=v=>p.l+(sc.fwd(v)-f0)/((f1-f0)||1)*p.pw;
+  const zx=X(0);
+  let s=`<line x1="${zx.toFixed(1)}" y1="${p.t}" x2="${zx.toFixed(1)}" y2="${p.t+p.ph}" stroke="var(--zero)" stroke-width="1.2"/>`;
+  rows.forEach((r,i)=>{
+    const y=p.t+i*rowH+4, h=rowH-11;
+    const xv=X(r.value), x=Math.min(zx,xv), w=Math.max(1.5,Math.abs(xv-zx));
+    s+=`<rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="${h}" rx="3" fill="${r.color||"var(--blue)"}" opacity="0.9">`
+     + `<title>${esc(r.label)}: ${esc(fmt(r.value,fmtD))}${esc(unit||"")}</title></rect>`;
+    s+=`<text x="4" y="${y+h-2}" font-size="10.5" fill="var(--ink)">${esc(r.label)}</text>`;
+    s+=`<text x="${W-2}" y="${y+h-2}" text-anchor="end" font-size="10.5" fill="var(--muted)">${esc(fmt(r.value,fmtD))}${esc(unit||"")}</text>`;
+  });
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${s}</svg>`;
+}
+
+/* Headroom bars: how close a flow sits to its limit. The bar is the usable
+   range, the marker is the flow. This is constraint-binding proximity, which
+   is the network state regional price separation actually depends on. */
+function headroomChart(el,W,model){
+  const rows=model.rows, rowH=34, H=PAD.t+PAD.b+rows.length*rowH;
+  const p=plotBox(W,H);
+  let s="";
+  rows.forEach((r,i)=>{
+    const y=p.t+i*rowH+6, h=13;
+    const lo=r.importlimit, hi=r.exportlimit, span=(hi-lo)||1;
+    const X=v=>p.l+((v-lo)/span)*p.pw;
+    const util=Math.max(0,Math.min(1,(r.value-lo)/span));
+    // headroom = fraction of the remaining distance to whichever limit is nearer
+    const near=Math.min(Math.abs(hi-r.value),Math.abs(r.value-lo));
+    const tight=near/Math.max(1,Math.abs(span))<0.08;
+    s+=`<rect x="${p.l}" y="${y}" width="${p.pw}" height="${h}" rx="3" fill="var(--grid)"/>`;
+    s+=`<rect x="${p.l}" y="${y}" width="${(util*p.pw).toFixed(1)}" height="${h}" rx="3" fill="${tight?"var(--coral)":"var(--blue)"}" opacity="0.85"/>`;
+    s+=`<line x1="${X(r.value).toFixed(1)}" y1="${y-3}" x2="${X(r.value).toFixed(1)}" y2="${y+h+3}" stroke="var(--ink-strong)" stroke-width="2"/>`;
+    s+=`<text x="2" y="${y+h-2}" font-size="10.5" fill="var(--ink)">${esc(r.label)}</text>`;
+    s+=`<text x="${p.l}" y="${y+h+14}" font-size="9.5" fill="var(--axis)">${fmt(lo)} MW</text>`;
+    s+=`<text x="${W-p.r}" y="${y+h+14}" text-anchor="end" font-size="9.5" fill="var(--axis)">${fmt(hi)} MW</text>`;
+    s+=`<text x="${W-p.r}" y="${y+h-2}" text-anchor="end" font-size="10.5" font-weight="700" fill="${tight?"var(--coral)":"var(--muted)"}">${fmt(r.value)} MW${tight?" ⚠":""}</text>`;
+  });
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${s}</svg>`;
+}
+
+/* ===================== components ===================== */
+let _chartSeq=0;
+const charts=[];   // {id, draw, model}
+function chartBox(title,cap,draw,model,wide){
+  const id="ch"+(++_chartSeq);
+  charts.push({id,draw,model});
+  return `<div class="chart${wide?" wide":""}"><h4>${esc(title)}</h4><p class="cap">${cap}</p><div id="${id}"></div></div>`;
+}
+function mountCharts(){
+  for(const c of charts){ const el=document.getElementById(c.id); if(el) mountChart(el,c.draw,c.model); }
+  charts.length=0;
+}
+function kpi(lab,val,note,cls){
+  return `<div class="kpi${cls?" "+cls:""}"><div class="lab">${esc(lab)}</div><div class="val">${val}</div>`
+       + (note?`<div class="note">${note}</div>`:"")+`</div>`;
+}
+function aboutBlock(o){
+  return `<div class="about">
+    <div class="card"><h3>${esc(o.title)}</h3><p>${o.what}</p><p>${o.why}</p>
+      <div class="endpoint"><span class="m">${esc(o.method)}</span> ${esc(o.url)}</div>
+      <div class="meta-row">${(o.chips||[]).map(c=>`<span class="chip ${c[0]}">${esc(c[1])}</span>`).join("")}</div></div>
+    <div class="card"><h3>Fields</h3><ul class="glossary">${(o.fields||[]).map(f=>`<li><code>${esc(f[0])}</code> ${f[1]}</li>`).join("")}</ul></div>
+  </div>`;
+}
+function tableFor(rows,cols){
+  if(!rows.length) return "";
+  return `<div class="tablewrap"><table><thead><tr>${cols.map(c=>`<th>${esc(c[0])}</th>`).join("")}</tr></thead>`
+    + `<tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td>${c[1](r)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function rawBlock(label,obj){
+  return `<details class="raw"><summary>${esc(label)}</summary><pre class="rawjson">${esc(JSON.stringify(obj,null,2).slice(0,60000))}</pre></details>`;
+}
+
+/* ===================== sites ===================== */
+/* Load centres drive demand through temperature and rooftop PV through cloud.
+   Generation clusters drive supply. They are never mixed on one axis, because
+   wind at the city is not wind at the turbines. */
+const LOAD_CENTRES=[
+  {name:"Sydney",   region:"NSW1", lat:-33.87, lon:151.21},
+  {name:"Brisbane", region:"QLD1", lat:-27.47, lon:153.03},
+  {name:"Adelaide", region:"SA1",  lat:-34.93, lon:138.60},
+  {name:"Hobart",   region:"TAS1", lat:-42.88, lon:147.33},
+  {name:"Melbourne",region:"VIC1", lat:-37.81, lon:144.96},
+];
+/* lat/lon from OpenNEM au_facilities.json (retrieved 2026-08-24); duid joins
+   back to the AEMO Registration & Exemption List. */
+const GEN_SITES=[
+  {name:"Hornsdale",     region:"SA1",  fuel:"wind",  duid:"HORNSDAL", mw:102, lat:-33.05982, lon:138.53767},
+  {name:"Snowtown Nth",  region:"SA1",  fuel:"wind",  duid:"SNOWNTH",  mw:144, lat:-33.75648, lon:138.14304},
+  {name:"Macarthur",     region:"VIC1", fuel:"wind",  duid:"MACARTH",  mw:420, lat:-38.04348, lon:142.17908},
+  {name:"Sapphire",      region:"NSW1", fuel:"wind",  duid:"SAPHWF1",  mw:270, lat:-29.71027, lon:151.44558},
+  {name:"White Rock",    region:"NSW1", fuel:"wind",  duid:"WRWF1",    mw:175, lat:-29.82918, lon:151.54539},
+  {name:"Coopers Gap",   region:"QLD1", fuel:"wind",  duid:"COOPGWF",  mw:452, lat:-26.71700, lon:151.44918},
+  {name:"Musselroe",     region:"TAS1", fuel:"wind",  duid:"MUSSELRO", mw:168, lat:-40.77711, lon:148.00631},
+  {name:"White Rock Sol",region:"NSW1", fuel:"solar", duid:"WRSF1",    mw:22,  lat:-29.76329, lon:151.55021},
+];
+
+/* ===================== sources ===================== */
+const SOURCES = {
+
+/* ---------- NOW ---------- */
+now:{
+  tab:"Now", sub:"5-min dispatch",
+  async load(){
+    const r=await fetch("https://visualisations.aemo.com.au/aemo/apps/api/report/ELEC_NEM_SUMMARY",
+      {headers:{accept:"application/json"}});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    return (j.ELEC_NEM_SUMMARY||[]).slice().sort((a,b)=>a.REGIONID.localeCompare(b.REGIONID));
+  },
+  render(rows){
+    if(!rows.length) return `<div class="msg err">Empty response.</div>`;
+    const sd=rows[0].SETTLEMENTDATE;
+    const links=[];
+    for(const r of rows){
+      let arr=[]; try{ arr=JSON.parse(r.INTERCONNECTORFLOWS||"[]"); }catch(e){}
+      for(const l of arr) if(!links.some(x=>x.label===l.name))
+        links.push({label:l.name,value:l.value,exportlimit:l.exportlimit,importlimit:l.importlimit});
+    }
+    const anyAPC = rows.some(r=>String(r.APCFLAG)!=="0"&&r.APCFLAG!=null&&r.APCFLAG!=="");
+    const anySusp = rows.some(r=>String(r.MARKETSUSPENDEDFLAG)!=="0"&&r.MARKETSUSPENDEDFLAG!=null&&r.MARKETSUSPENDEDFLAG!=="");
+    const neg = rows.filter(r=>+r.PRICE<0);
+    const hi  = rows.filter(r=>+r.PRICE>300);
+    const maxR = rows.reduce((m,r)=>+r.PRICE>+m.PRICE?r:m,rows[0]);
+
+    const about = aboutBlock({
+      title:"NEM dispatch summary",
+      what:"One row per region every five minutes: the regional reference price, operational demand, "
+        +"scheduled and semi-scheduled generation, net interchange, and the flow on every interconnector "
+        +"touching that region &mdash; each with its export and import limit.",
+      why:"Since October 2021 the five-minute dispatch price <em>is</em> the settlement price, so this is the "
+        +"quantity that settles, not an indicator of it. Price here is a shadow price on the regional energy "
+        +"balance constraint, which is why it can jump three orders of magnitude between intervals without any "
+        +"physical variable moving much at all.",
+      method:"GET", url:"https://visualisations.aemo.com.au/aemo/apps/api/report/ELEC_NEM_SUMMARY",
+      chips:[["ok","CORS open"],["","JSON"],["","5 min"],["warn","undocumented internal API"]],
+      fields:[
+        ["PRICE","Regional reference price, $/MWh. Floor −$1,000, cap $23,200 (FY2026-27)."],
+        ["PRICE_STATUS","FIRM, or an administered/intervention state. A regime marker."],
+        ["APCFLAG","Administered price cap in force — the market is no longer pricing freely."],
+        ["MARKETSUSPENDEDFLAG","Market suspension. Rare, and the canonical distribution-shift event."],
+        ["TOTALDEMAND","<em>Operational</em> demand, MW. Excludes ~26 GW of behind-the-meter rooftop PV."],
+        ["SEMISCHEDULEDGENERATION","Wind and utility solar, MW. The weather-driven half of supply."],
+        ["INTERCONNECTORFLOWS","Nested JSON: flow plus export/import limit per link."],
+      ]});
+
+    const kpis = `<div class="kpis">
+      ${kpi("Interval",hhmm(sd),esc(sd.slice(0,10)))}
+      ${kpi("Highest price","$"+fmt(maxR.PRICE,2),esc(maxR.REGIONID),+maxR.PRICE>300?"alert":"")}
+      ${kpi("Negative regions",String(neg.length),neg.length?neg.map(r=>r.REGIONID).join(", "):"none right now")}
+      ${kpi("Above $300",String(hi.length),hi.length?hi.map(r=>r.REGIONID).join(", "):"none right now",hi.length?"alert":"")}
+      ${kpi("Total demand",fmt(rows.reduce((s,r)=>s+ +r.TOTALDEMAND,0))+" <small>MW</small>","operational, excl. rooftop")}
+      ${kpi("Market regime",anySusp?"SUSPENDED":anyAPC?"ADMINISTERED":"Normal","APC / suspension flags",(anySusp||anyAPC)?"alert":"")}
+    </div>`;
+
+    const priceRows=rows.map(r=>({label:r.REGIONID,value:+r.PRICE,color:REGION_COLORS[r.REGIONID]}));
+    const demRows=rows.map(r=>({label:r.REGIONID,value:+r.TOTALDEMAND,color:REGION_COLORS[r.REGIONID]}));
+    const vreRows=rows.map(r=>({label:r.REGIONID,value:+r.SEMISCHEDULEDGENERATION,color:REGION_COLORS[r.REGIONID]}));
+
+    const chartsHTML=`<div class="charts">
+      ${chartBox("Regional price","Symlog axis — negative prices and spikes are both visible without either erasing the other.",
+        barChart,{rows:priceRows,unit:" $/MWh",fmtD:2,diverging:true,scale:symlog({linthresh:100})})}
+      ${chartBox("Operational demand","Excludes rooftop PV, so this is not what households actually consumed.",
+        barChart,{rows:demRows,unit:" MW",fmtD:0})}
+      ${chartBox("Semi-scheduled generation","Wind and utility solar — the part of supply the weather sets.",
+        barChart,{rows:vreRows,unit:" MW",fmtD:0})}
+      ${chartBox("Interconnector headroom","Bar is the usable range between import and export limit; the tick is the actual flow. Red means within 8% of a limit — the link is close to binding, which is when regions decouple and prices separate.",
+        headroomChart,{rows:links},true)}
+    </div>`;
+
+    const table=tableFor(rows,[
+      ["Region",r=>esc(r.REGIONID)],["Price $/MWh",r=>fmt(r.PRICE,2)],["Status",r=>esc(r.PRICE_STATUS||"–")],
+      ["Demand MW",r=>fmt(r.TOTALDEMAND)],["Scheduled",r=>fmt(r.SCHEDULEDGENERATION)],
+      ["Semi-sched",r=>fmt(r.SEMISCHEDULEDGENERATION)],["Net interchange",r=>fmt(r.NETINTERCHANGE)],
+    ]);
+    return about+kpis+chartsHTML
+      +`<details class="raw"><summary>Region table</summary>${table}</details>`
+      +rawBlock("Raw JSON",rows);
+  }
+},
+
+/* ---------- FORECAST ---------- */
+forecast:{
+  tab:"Forecast", sub:"pre-dispatch trajectory",
+  async load(){
+    // text/plain keeps this a CORS "simple request" so no preflight is needed
+    const r=await fetch("https://visualisations.aemo.com.au/aemo/apps/api/report/5MIN",
+      {method:"POST",headers:{"content-type":"text/plain"},body:JSON.stringify({timeScale:["30MIN"]})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    return j["5MIN"]||[];
+  },
+  render(rows){
+    if(!rows.length) return `<div class="msg err">Empty response.</div>`;
+    const reg=prefs.region;
+    const mine=rows.filter(r=>r.REGIONID===reg);
+    const act=mine.filter(r=>r.PERIODTYPE==="ACTUAL").sort((a,b)=>nemParse(a.SETTLEMENTDATE)-nemParse(b.SETTLEMENTDATE));
+    const fc =mine.filter(r=>r.PERIODTYPE!=="ACTUAL").sort((a,b)=>nemParse(a.SETTLEMENTDATE)-nemParse(b.SETTLEMENTDATE));
+    const boundary = act.length?nemParse(act[act.length-1].SETTLEMENTDATE):null;
+
+    const about=aboutBlock({
+      title:"Pre-dispatch price and demand forecast",
+      what:`AEMO's own forward trajectory: roughly two days of settled actuals followed by ~56 forecast `
+        +`intervals per region, reissued every five minutes. Each reissue is a new <em>vintage</em>.`,
+      why:"This is the baseline any model has to beat, and it is free. It is also the number participants "
+        +"rebid against &mdash; rebid reasons literally quote it &mdash; so the published forecast partly causes "
+        +"the outcome it is forecasting.",
+      method:"POST", url:"https://visualisations.aemo.com.au/aemo/apps/api/report/5MIN  ←  {\"timeScale\":[\"30MIN\"]}",
+      chips:[["ok","CORS open"],["","JSON"],["","reissued 5 min"],["warn","empty body returns 204"]],
+      fields:[
+        ["PERIODTYPE","ACTUAL for settled intervals, otherwise a forecast."],
+        ["RRP","Forecast regional reference price, $/MWh."],
+        ["TOTALDEMAND","Forecast operational demand, MW."],
+        ["SETTLEMENTDATE","The interval being forecast — not when the forecast was made."],
+      ]});
+
+    const bar=`<div class="regionbar">${REGIONS.map(r=>
+      `<button data-region="${r}" class="${r===reg?"on":""}">${r}</button>`).join("")}</div>`;
+
+    const pricePts=[...act,...fc].map(r=>({x:nemParse(r.SETTLEMENTDATE),y:+r.RRP}));
+    const demPts  =[...act,...fc].map(r=>({x:nemParse(r.SETTLEMENTDATE),y:+r.TOTALDEMAND}));
+    const nextFc = fc[0];
+    const lastAct= act[act.length-1];
+
+    const kpis=`<div class="kpis">
+      ${kpi("Region",esc(reg),"select below")}
+      ${kpi("Last actual",lastAct?"$"+fmt(lastAct.RRP,2):"–",lastAct?hhmm(lastAct.SETTLEMENTDATE):"")}
+      ${kpi("Next forecast",nextFc?"$"+fmt(nextFc.RRP,2):"–",nextFc?hhmm(nextFc.SETTLEMENTDATE):"")}
+      ${kpi("Forecast points",String(fc.length),"intervals ahead")}
+      ${kpi("Max forecast",fc.length?"$"+fmt(Math.max(...fc.map(r=>+r.RRP)),2):"–","over the trajectory")}
+      ${kpi("Min forecast",fc.length?"$"+fmt(Math.min(...fc.map(r=>+r.RRP)),2):"–","negative is normal")}
+    </div>`;
+
+    const chartsHTML=`<div class="charts">
+      ${chartBox("Price: actual → forecast",
+        "Solid is settled, dashed is forecast, the gold rule is now. Symlog axis, shaded band below zero.",
+        timeChart,{series:[{name:"RRP",color:REGION_COLORS[reg],points:pricePts,dashedFrom:boundary}],
+          scale:symlog({linthresh:100}),unit:"",fmtD:0,nowAt:boundary,
+          bands:[{from:-1000,to:0,fill:"var(--neg-band)"},{from:300,to:23200,fill:"var(--spike-band)"}]},true)}
+      ${chartBox("Demand: actual → forecast","Operational demand, MW. Smooth and physical — the opposite of price.",
+        timeChart,{series:[{name:"Demand",color:"var(--cyan)",points:demPts,dashedFrom:boundary}],
+          scale:linear(),unit:"",fmtD:0,nowAt:boundary},true)}
+    </div>`;
+
+    return about+bar+kpis+chartsHTML+rawBlock("Raw JSON (first 200 rows)",rows.slice(0,200));
+  },
+  after(){
+    document.querySelectorAll("[data-region]").forEach(b=>b.onclick=()=>{
+      prefs.region=b.dataset.region; savePrefs(); rerender();
+    });
+  }
+},
+
+/* ---------- WEATHER ---------- */
+weather:{
+  tab:"Weather", sub:"at the turbines",
+  async load(){
+    const sites=[...GEN_SITES,...LOAD_CENTRES];
+    const vars=["temperature_2m","cloud_cover","shortwave_radiation","wind_speed_10m","wind_speed_100m","wind_gusts_10m"];
+    // BoM's ACCESS-G is deliberately excluded: Bureau products are free to
+    // access but not licensed for commercial use, and this is meant to become
+    // a commercial product.
+    const url="https://api.open-meteo.com/v1/forecast"
+      +"?latitude="+sites.map(s=>s.lat).join(",")
+      +"&longitude="+sites.map(s=>s.lon).join(",")
+      +"&hourly="+vars.join(",")
+      +"&models=ecmwf_ifs025&forecast_days=2&timezone=Australia%2FBrisbane";
+    const r=await fetch(url);
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    const arr=Array.isArray(j)?j:[j];
+    return arr.map((d,i)=>Object.assign({},sites[i],{data:d}));
+  },
+  render(sites){
+    const gen=sites.filter(s=>s.fuel), load=sites.filter(s=>!s.fuel);
+    const about=aboutBlock({
+      title:"Weather at generation clusters",
+      what:"Hub-height wind, irradiance, cloud and temperature for the wind and solar sites that actually "
+        +"set semi-scheduled output, plus the five load centres that drive demand. One request, "
+        +"ECMWF IFS at 0.25°.",
+      why:"Wind at the turbines drives price. Wind at the city does not — Adelaide is 180 km from the "
+        +"Mid-North wind farms and often sits in the opposite regime. Conditional on the bid stack and the "
+        +"network, nearly all remaining uncertainty at 1–48 hours is uncertainty about wind speed at hub "
+        +"height, irradiance, and temperature. The weather model is the real world model; the grid layer on "
+        +"top of it is comparatively shallow.",
+      method:"GET", url:"https://api.open-meteo.com/v1/forecast?latitude=…&models=ecmwf_ifs025",
+      chips:[["ok","CORS open"],["ok","no API key"],["","hourly"],["bad","BoM model excluded — licensing"]],
+      fields:[
+        ["wind_speed_100m","Hub-height wind. <strong>The load-bearing variable.</strong>"],
+        ["wind_speed_10m","Met-station height. The decoy — the 10m/100m ratio shifts with stability."],
+        ["wind_gusts_10m","Matters for turbine cut-out, which takes a farm to zero."],
+        ["shortwave_radiation","Global horizontal irradiance, W/m² — fixed-tilt solar and rooftop PV."],
+        ["cloud_cover","At load centres, the rooftop-PV proxy AEMO cannot meter directly."],
+        ["temperature_2m","Demand driver, and panel derating on extreme-heat days."],
+      ]});
+
+    const t0=Date.now();
+    const idxNow = s => {
+      const times=s.data.hourly.time;
+      let best=0,bd=Infinity;
+      times.forEach((t,i)=>{ const d=Math.abs(Date.parse(t+"Z")-t0); if(d<bd){bd=d;best=i;} });
+      return best;
+    };
+    const windNow=gen.filter(s=>s.fuel==="wind").map(s=>({
+      label:s.name+" ("+s.region+")", value:s.data.hourly.wind_speed_100m[idxNow(s)], color:REGION_COLORS[s.region]}));
+    const tempNow=load.map(s=>({label:s.name,value:s.data.hourly.temperature_2m[idxNow(s)],color:REGION_COLORS[s.region]}));
+
+    const windMax=Math.max(...windNow.map(r=>r.value||0));
+    const kpis=`<div class="kpis">
+      ${kpi("Sites",String(sites.length),"gen clusters + load centres")}
+      ${kpi("Model","ECMWF","IFS 0.25°")}
+      ${kpi("Strongest hub wind",fmt(windMax,1)+" <small>km/h</small>",
+        esc((windNow.find(r=>r.value===windMax)||{}).label||""))}
+      ${kpi("Hottest load centre",fmt(Math.max(...tempNow.map(r=>r.value||0)),1)+" <small>°C</small>","drives demand")}
+    </div>`;
+
+    // one wind site per region, 48h trajectory
+    const windSeries=gen.filter(s=>s.fuel==="wind").map(s=>({
+      name:s.name, color:REGION_COLORS[s.region],
+      points:s.data.hourly.time.map((t,i)=>({x:Date.parse(t+"Z"),y:s.data.hourly.wind_speed_100m[i]}))
+    }));
+    const irrSeries=[...gen.filter(s=>s.fuel==="solar"),...load].slice(0,5).map(s=>({
+      name:s.name, color:REGION_COLORS[s.region],
+      points:s.data.hourly.time.map((t,i)=>({x:Date.parse(t+"Z"),y:s.data.hourly.shortwave_radiation[i]}))
+    }));
+
+    const legend=q=>`<div class="legend">${q.map(s=>
+      `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("")}</div>`;
+
+    const chartsHTML=`<div class="charts">
+      ${chartBox("Hub-height wind, next 48 h","100 m wind at wind-farm coordinates. A simultaneous lull across "
+        +"the southern clusters is a wind drought, and it is what pushes gas to the top of the stack.",
+        timeChart,{series:windSeries,scale:linear(),unit:"",fmtD:0,clampZero:true,nowAt:t0},true)}
+      ${chartBox("Irradiance, next 48 h","Global horizontal irradiance at solar sites and load centres. "
+        +"Cloud over a load centre suppresses rooftop PV, which raises operational demand without anyone consuming more.",
+        timeChart,{series:irrSeries,scale:linear(),unit:"",fmtD:0,clampZero:true,nowAt:t0},true)}
+      ${chartBox("Wind now, by cluster","Hub height, km/h.",barChart,{rows:windNow,unit:" km/h",fmtD:1})}
+      ${chartBox("Temperature now, load centres","°C.",barChart,{rows:tempNow,unit:" °C",fmtD:1,diverging:true})}
+    </div>`;
+
+    return about+kpis+legend(windSeries)+chartsHTML
+      +`<div class="note-strong">Coordinates come from OpenNEM's facility registry and name real wind farms;
+        they are not a substitute for a full generator registry. The AEMO Registration &amp; Exemption List
+        carries DUID, region, fuel and capacity but <em>no</em> coordinates, so the two have to be joined.</div>`;
+  }
+},
+
+/* ---------- WEM ---------- */
+wem:{
+  tab:"WEM", sub:"Western Australia",
+  async load(){
+    const yr=new Date().getFullYear();
+    const url=`https://data.wa.aemo.com.au/public/public-data/datafiles/market-clearing-prices-csv/MarketClearingPrices-${yr}.csv`;
+    // newest-first file; a Range request avoids pulling several MB for one day
+    const r=await fetch(url,{headers:{Range:"bytes=0-400000"}});
+    if(!r.ok && r.status!==206) throw new Error("HTTP "+r.status);
+    const text=await r.text();
+    const rows=parseCSV(text);
+    const head=rows[0];
+    const body=rows.slice(1).filter(x=>x.length>=head.length-1&&x[0]);
+    return {head,rows:body.slice(0,288)};
+  },
+  render(d){
+    const col=n=>d.head.findIndex(h=>h.trim().toLowerCase()===n.toLowerCase());
+    const iT=col("Dispatch Interval"), iP=col("Energy Clearing Price");
+    const recs=d.rows.map(r=>({t:r[iT],p:parseFloat(r[iP])})).filter(r=>isFinite(r.p));
+    const about=aboutBlock({
+      title:"WEM market clearing prices",
+      what:"Five-minute energy and essential-system-service clearing prices for the South West "
+        +"Interconnected System, newest row first.",
+      why:"WA is a separate, islanded market with a capacity mechanism, so it is a genuine second instance "
+        +"of the same problem rather than a sixth NEM region. A model that transfers between them has learned "
+        +"something structural. Note the hard constraint: the WEM was reformed on 1 October 2023, so usable "
+        +"history under the current design starts there — under three years.",
+      method:"GET", url:"https://data.wa.aemo.com.au/public/public-data/datafiles/market-clearing-prices-csv/MarketClearingPrices-YYYY.csv",
+      chips:[["ok","CORS open"],["","CSV, newest first"],["","5 min"],["warn","~3.8 MB — Range-fetched"]],
+      fields:[
+        ["Energy Clearing Price","$/MWh for the interval."],
+        ["Regulation Raise/Lower","Frequency regulation, now dominated by batteries."],
+        ["Contingency Raise/Lower","Contingency reserve."],
+        ["RoCoF Clearing Price","Rate of change of frequency — an inertia scarcity price with no NEM equivalent."],
+      ]});
+    // file is newest-first, so reverse for a left-to-right time axis
+    const pts=recs.slice().reverse().map((r,i)=>({x:i,y:r.p}));
+    const kpis=`<div class="kpis">
+      ${kpi("Latest",recs.length?"$"+fmt(recs[0].p,2):"–",esc(recs.length?recs[0].t:""))}
+      ${kpi("Intervals",String(recs.length),"most recent in file")}
+      ${kpi("Max",recs.length?"$"+fmt(Math.max(...recs.map(r=>r.p)),2):"–","in window")}
+      ${kpi("Min",recs.length?"$"+fmt(Math.min(...recs.map(r=>r.p)),2):"–","in window")}
+    </div>`;
+    const chartsHTML=`<div class="charts">${chartBox("Energy clearing price",
+      "Most recent intervals, oldest at left. Symlog axis for the same reason as the NEM.",
+      timeChart,{series:[{name:"WEM",color:"var(--cyan)",points:pts}],scale:symlog({linthresh:100}),unit:"",fmtD:0},true)}</div>`;
+    return about+kpis+chartsHTML+rawBlock("First 40 rows",d.rows.slice(0,40));
+  }
+},
+
+/* ---------- FEEDS ---------- */
+feeds:{
+  tab:"Feeds", sub:"registry + licensing",
+  async load(){ return true; },
+  render(){
+    const T=[
+      ["NEM dispatch summary","visualisations.aemo.com.au …/ELEC_NEM_SUMMARY","5 min","browser","AEMO, attribution","wired"],
+      ["NEM pre-dispatch","visualisations.aemo.com.au …/5MIN","5 min","browser","AEMO, attribution","wired"],
+      ["WEM clearing prices","data.wa.aemo.com.au …/market-clearing-prices-csv","5 min","browser","AEMO, attribution","wired"],
+      ["Weather (ECMWF)","api.open-meteo.com/v1/forecast","hourly","browser","CC BY 4.0","wired"],
+      ["Rooftop PV actual","nemweb …/ROOFTOP_PV/ACTUAL","30 min","collector","AEMO, attribution","wired"],
+      ["Rooftop PV forecast","nemweb …/ROOFTOP_PV/FORECAST","30 min","collector","AEMO, attribution","wired"],
+      ["Market notices","nemweb …/Market_Notice","~10/day","collector","AEMO, attribution","next"],
+      ["MMSDM archive (2009–)","nemweb …/Data_Archive/…/MMSDM","monthly","batch","AEMO, attribution","next"],
+      ["Bid stacks + rebid reasons","nemweb …/Bidmove_Complete","daily","collector","AEMO, attribution","next"],
+      ["Registration & Exemption List","aemo.com.au … nem-registration-and-exemption-list.xls","weekly","batch","AEMO, attribution","next"],
+      ["Gas Bulletin Board","nemweb …/GBB","daily","collector","AEMO, attribution","later"],
+      ["DEA fire hotspots","hotspots.dea.ga.gov.au …/wfs","~10 min","browser","CC BY 4.0","later"],
+      ["Bureau of Meteorology","bom.gov.au","10 min","—","<strong>not for commercial use</strong>","excluded"],
+      ["APVI rooftop PV","pv-map.apvi.org.au","live","—","token required (401)","blocked"],
+    ];
+    const badge=s=>s==="wired"?`<span class="chip ok">wired</span>`
+      :s==="excluded"||s==="blocked"?`<span class="chip bad">${s}</span>`
+      :`<span class="chip warn">${s}</span>`;
+    const rows=T.map(r=>`<tr><td>${esc(r[0])}</td><td style="font-family:ui-monospace;font-size:11px">${esc(r[1])}</td>`
+      +`<td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${r[4]}</td><td>${badge(r[5])}</td></tr>`).join("");
+    return `<div class="about"><div class="card">
+        <h3>Source registry</h3>
+        <p>Every feed, its cadence, how it is reached, and whether it can be used commercially.
+        The report this project came from asked for a source and licence registry <em>before</em> any model.
+        This is it.</p>
+        <p><strong>Two things worth knowing.</strong> The AEMO endpoints the dashboard uses are the
+        undocumented internal API behind AEMO's own site &mdash; no SLA, no versioning. Canonical ingestion
+        should move to NEMWeb. And Bureau of Meteorology data is free to read but <em>not</em> licensed for
+        commercial use, which is why the weather query pins ECMWF rather than BoM ACCESS-G.</p>
+      </div>
+      <div class="card"><h3>The part that isn't a moat</h3>
+        <p>AEMO's MMSDM archive publishes everything here &mdash; including <em>vintaged</em> P5MIN and
+        pre-dispatch forecast solutions &mdash; back to 2009, free. Collecting live data from today is a
+        latency advantage, not a history advantage. Anyone can have seventeen years by Friday.</p>
+        <p>What can't be copied is a public, continuously-updated record of forecast skill scored against
+        AEMO's own numbers, and a validated extraction pipeline over the operational text
+        (market notices, rebid reasons, constraint equations) that nothing else joins to outcomes.</p>
+      </div></div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Source</th><th>Endpoint</th><th>Cadence</th><th>Reached via</th><th>Licence</th><th>Status</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>
+      <div class="note-strong">"browser" = CORS-open, fetched directly by this page.
+        "collector" = no CORS header, so <code>collect.js</code> pulls it server-side.
+        "batch" = bulk or reference data, downloaded periodically rather than polled.</div>`;
+  }
+},
+};
+
+/* ===================== app shell ===================== */
+let currentData=null;
+function setStatus(state,text){
+  $("#dot").className="dot"+(state?" "+state:"");
+  $("#statusText").textContent=text;
+}
+function buildTabs(){
+  $("#tabs").innerHTML=Object.entries(SOURCES).map(([k,s])=>
+    `<button class="tab${k===prefs.tab?" active":""}" data-tab="${k}">${esc(s.tab)}<span class="sub">${esc(s.sub)}</span></button>`).join("");
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
+    prefs.tab=b.dataset.tab; savePrefs(); location.hash=prefs.tab; load();
+  });
+}
+function rerender(){
+  if(currentData==null) return;
+  const src=SOURCES[prefs.tab];
+  charts.length=0;
+  $("#panel").innerHTML=src.render(currentData);
+  mountCharts();
+  if(src.after) src.after();
+}
+async function load(){
+  const src=SOURCES[prefs.tab];
+  buildTabs();
+  setStatus("load","Fetching …");
+  $("#panel").innerHTML=`<div class="msg info">Fetching ${esc(src.tab)} …</div>`;
+  try{
+    currentData=await src.load();
+    rerender();
+    setStatus("live","Updated "+new Date().toLocaleTimeString("en-AU"));
+  }catch(e){
+    currentData=null;
+    setStatus("err","Failed");
+    $("#panel").innerHTML=`<div class="msg err"><strong>Could not load ${esc(src.tab)}.</strong><br>
+      ${esc(e.message||String(e))}<br><br>
+      Usually this is no network, or the browser blocking the cross-origin request.
+      These endpoints send <code>Access-Control-Allow-Origin: *</code>, so opening this file directly
+      from disk normally works &mdash; but a corporate proxy or an extension can still intercept it.</div>`;
+  }
+}
+
+/* ---- wiring ---- */
+applyTheme();
+$("#theme").onclick=()=>{
+  prefs.theme = prefs.theme==="auto"?"light":prefs.theme==="light"?"dark":"auto";
+  savePrefs(); applyTheme(); rerender();
+};
+$("#refresh").onclick=load;
+$("#auto").checked=prefs.auto;
+let timer=null;
+function setAuto(on){
+  prefs.auto=on; savePrefs();
+  if(timer){ clearInterval(timer); timer=null; }
+  // the dispatch feed only moves every 5 minutes, so polling faster than that
+  // just refetches identical bytes
+  if(on) timer=setInterval(load,150000);
+}
+$("#auto").onchange=e=>setAuto(e.target.checked);
+window.addEventListener("hashchange",()=>{
+  const h=location.hash.replace("#","");
+  if(SOURCES[h] && h!==prefs.tab){ prefs.tab=h; savePrefs(); load(); }
+});
+const initial=location.hash.replace("#","");
+if(SOURCES[initial]) prefs.tab=initial; else location.hash=prefs.tab;
+setAuto(prefs.auto);
+load();
+</script>
+</body>
+</html>
