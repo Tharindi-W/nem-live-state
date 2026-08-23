@@ -1,6 +1,6 @@
 {
   "dispatch": {
-    "fetched_at": "2026-08-23T23:56:39.187Z",
+    "fetched_at": "2026-08-23T23:59:35.104Z",
     "rows": [
       {
         "SETTLEMENTDATE": "2026-08-24T10:00:00",
@@ -70,23 +70,11 @@
     ]
   },
   "predispatch": {
-    "fetched_at": "2026-08-23T23:49:33.098Z",
-    "issue": "2026-08-24T09:50:00",
+    "fetched_at": "2026-08-23T23:59:36.750Z",
+    "issue": "2026-08-24T10:00:00",
     "n_actual": 1440,
-    "n_forecast": 185,
+    "n_forecast": 180,
     "forecast": [
-      {
-        "SETTLEMENTDATE": "2026-08-24T10:00:00",
-        "REGIONID": "NSW1",
-        "REGION": "NSW1",
-        "RRP": 26.302,
-        "TOTALDEMAND": 7599.67,
-        "PERIODTYPE": "FORECAST",
-        "NETINTERCHANGE": -230.46,
-        "SCHEDULEDGENERATION": 3256.83901,
-        "SEMISCHEDULEDGENERATION": 4107.53099,
-        "APCFLAG": 0
-      },
       {
         "SETTLEMENTDATE": "2026-08-24T10:30:00",
         "REGIONID": "NSW1",
@@ -517,18 +505,6 @@
         "NETINTERCHANGE": -1552.52,
         "SCHEDULEDGENERATION": 3902.002,
         "SEMISCHEDULEDGENERATION": 1486.088,
-        "APCFLAG": 0
-      },
-      {
-        "SETTLEMENTDATE": "2026-08-24T10:00:00",
-        "REGIONID": "QLD1",
-        "REGION": "QLD1",
-        "RRP": 24.81,
-        "TOTALDEMAND": 6232.7,
-        "PERIODTYPE": "FORECAST",
-        "NETINTERCHANGE": 351.76,
-        "SCHEDULEDGENERATION": 3205.302,
-        "SEMISCHEDULEDGENERATION": 3374.248,
         "APCFLAG": 0
       },
       {
@@ -964,18 +940,6 @@
         "APCFLAG": 0
       },
       {
-        "SETTLEMENTDATE": "2026-08-24T10:00:00",
-        "REGIONID": "SA1",
-        "REGION": "SA1",
-        "RRP": 101.02,
-        "TOTALDEMAND": 1761.82,
-        "PERIODTYPE": "FORECAST",
-        "NETINTERCHANGE": -307.48,
-        "SCHEDULEDGENERATION": 244.609,
-        "SEMISCHEDULEDGENERATION": 1201.551,
-        "APCFLAG": 0
-      },
-      {
         "SETTLEMENTDATE": "2026-08-24T10:30:00",
         "REGIONID": "SA1",
         "REGION": "SA1",
@@ -1408,18 +1372,6 @@
         "APCFLAG": 0
       },
       {
-        "SETTLEMENTDATE": "2026-08-24T10:00:00",
-        "REGIONID": "TAS1",
-        "REGION": "TAS1",
-        "RRP": 11.20746,
-        "TOTALDEMAND": 1144,
-        "PERIODTYPE": "FORECAST",
-        "NETINTERCHANGE": -374.49,
-        "SCHEDULEDGENERATION": 494.902,
-        "SEMISCHEDULEDGENERATION": 274.608,
-        "APCFLAG": 0
-      },
-      {
         "SETTLEMENTDATE": "2026-08-24T10:30:00",
         "REGIONID": "TAS1",
         "REGION": "TAS1",
@@ -1849,18 +1801,6 @@
         "NETINTERCHANGE": -406.84,
         "SCHEDULEDGENERATION": 593.899,
         "SEMISCHEDULEDGENERATION": 33.261,
-        "APCFLAG": 0
-      },
-      {
-        "SETTLEMENTDATE": "2026-08-24T10:00:00",
-        "REGIONID": "VIC1",
-        "REGION": "VIC1",
-        "RRP": 10.6501,
-        "TOTALDEMAND": 6093.19,
-        "PERIODTYPE": "FORECAST",
-        "NETINTERCHANGE": 593.83,
-        "SCHEDULEDGENERATION": 3974.012,
-        "SEMISCHEDULEDGENERATION": 2697.778,
         "APCFLAG": 0
       },
       {
@@ -2298,7 +2238,7 @@
     ]
   },
   "wem": {
-    "fetched_at": "2026-08-23T23:57:10.628Z",
+    "fetched_at": "2026-08-23T23:59:38.745Z",
     "latest": {
       "Dispatch Interval": "23/08/2026 07:55:00",
       "Energy Clearing Price": "108.79",
@@ -2311,9 +2251,9 @@
       "Extracted At": "23/08/2026 08:21:04"
     }
   },
-  "_collected_at": "2026-08-23T23:57:12.242Z",
+  "_collected_at": "2026-08-23T23:59:41.953Z",
   "rooftop_actual": {
-    "fetched_at": "2026-08-23T23:57:10.629Z",
+    "fetched_at": "2026-08-23T23:59:38.746Z",
     "files": 0,
     "rows": 0
   },
