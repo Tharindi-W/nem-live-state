@@ -262,6 +262,10 @@ function mountChart(el,draw,model){
   el.__model=model;
   el.__redraw=()=>{
     const W=Math.max(280,Math.round(el.clientWidth||el.parentNode.clientWidth||560));
+    // Without this guard the observer feeds itself: redrawing replaces the SVG,
+    // which changes the element's size, which fires the observer again. Only
+    // redraw when the measured width actually moved.
+    if(W===el.__W) return;
     el.__W=W; draw(el,W,el.__model);
   };
   if(_ro && !el.__observed){ _ro.observe(el); el.__observed=true; }
@@ -828,16 +832,23 @@ function rerender(){
   mountCharts();
   if(src.after) src.after();
 }
+/* Switching tabs quickly leaves earlier fetches in flight. Without a token the
+   slower one can resolve last and paint its data into the newer tab. */
+let loadToken=0;
 async function load(){
   const src=SOURCES[prefs.tab];
+  const token=++loadToken;
   buildTabs();
   setStatus("load","Fetching …");
   $("#panel").innerHTML=`<div class="msg info">Fetching ${esc(src.tab)} …</div>`;
   try{
-    currentData=await src.load();
+    const data=await src.load();
+    if(token!==loadToken) return;      // superseded — drop it silently
+    currentData=data;
     rerender();
     setStatus("live","Updated "+new Date().toLocaleTimeString("en-AU"));
   }catch(e){
+    if(token!==loadToken) return;
     currentData=null;
     setStatus("err","Failed");
     $("#panel").innerHTML=`<div class="msg err"><strong>Could not load ${esc(src.tab)}.</strong><br>
