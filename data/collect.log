@@ -312,3 +312,11 @@
 [2026-08-23T23:49:33.141Z] predispatch: +1440 backfilled 5-min actual rows
 [2026-08-23T23:49:33.142Z] predispatch: +185 forecast rows, vintage 2026-08-24T09:50:00
 [2026-08-23T23:49:33.143Z] run complete: 185 new rows across [predispatch]
+[2026-08-23T23:56:39.188Z] dispatch: +5 rows, +12 interconnector rows @ 2026-08-24T10:00:00
+[2026-08-23T23:57:09.191Z] predispatch: ERROR This operation was aborted
+[2026-08-23T23:57:10.628Z] wem: no new interval (23/08/2026 07:55:00)
+[2026-08-23T23:57:11.395Z] rooftop_actual SATELLITE: no new file
+[2026-08-23T23:57:11.612Z] rooftop_actual MEASUREMENT: no new file
+[2026-08-23T23:57:11.612Z] rooftop_actual: +0 rows from 0 file(s)
+[2026-08-23T23:57:12.242Z] rooftop_forecast: no new vintage (PUBLIC_ROOFTOP_PV_FORECAST_20260824093000_0000000534188877.zip)
+[2026-08-23T23:57:12.243Z] run complete: 17 new rows across [dispatch, predispatch, wem, rooftop_actual, rooftop_forecast]
