@@ -4,3 +4,7 @@
 * text=auto eol=lf
 *.ps1 text eol=crlf
 *.pdf binary
+
+# latest.json is a snapshot rewritten in full every run. Never try to merge it --
+# take whichever side is being applied; the next collection regenerates it anyway.
+data/latest.json merge=ours

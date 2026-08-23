@@ -4,3 +4,7 @@ Thumbs.db
 *.log.bak
 # WEM facility SCADA is ~19 MB per pull — keep it out of git history
 data/wem_scada*.csv
+
+# Regenerated every run and append-only, so it conflicts between the scheduled
+# Actions run and any local run. The Actions log already records CI collection.
+data/collect.log
