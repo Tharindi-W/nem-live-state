@@ -1,0 +1,6 @@
+# The collector appends to these CSVs from Linux (GitHub Actions) and from
+# Windows. Without a fixed EOL, the two platforms rewrite each other's lines
+# and every run produces a whole-file diff.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.pdf binary
