@@ -37,7 +37,12 @@ jobs:
         with:
           node-version: '20'
 
+      # collect.js exits non-zero when a source fails, but the sources that did
+      # succeed still have rows worth keeping -- so record the outcome, commit,
+      # and fail the job afterwards rather than skipping the commit.
       - name: Collect
+        id: collect
+        continue-on-error: true
         run: node collect.js
 
       - name: Commit new rows
@@ -56,3 +61,10 @@ jobs:
             done
             exit 1
           fi
+
+      - name: Surface collection failures
+        if: steps.collect.outcome == 'failure'
+        run: |
+          echo "::error::One or more sources failed to collect. New rows from the"
+          echo "::error::sources that succeeded have still been committed."
+          exit 1

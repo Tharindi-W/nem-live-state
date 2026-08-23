@@ -23,7 +23,10 @@ const DATA_DIR = path.join(__dirname, "data");
 const STATE_FILE = path.join(DATA_DIR, "_state.json");
 const LOG_FILE = path.join(DATA_DIR, "collect.log");
 const LATEST_FILE = path.join(DATA_DIR, "latest.json");
-const TIMEOUT_MS = 30000;
+// 30s was too tight: the pre-dispatch response is ~400 KB and aborted on
+// GitHub-hosted runners, losing the most valuable feed on every scheduled run.
+const TIMEOUT_MS = 90000;
+const RETRIES = 3;
 const WEM_SEED_MAX = 288;          // on first run, seed at most this many WEM intervals
 const REGIONS = ["NSW1", "QLD1", "SA1", "TAS1", "VIC1"];
 // NEMWeb rejects the default Node fetch user-agent with 403
@@ -41,6 +44,25 @@ function loadState() {
   try { return JSON.parse(fs.readFileSync(STATE_FILE, "utf8")); } catch (e) { return {}; }
 }
 function saveState(s) { fs.writeFileSync(STATE_FILE, JSON.stringify(s, null, 2)); }
+
+// A transient failure loses that interval permanently -- the dedupe cursor has
+// already moved on by the next run -- so every fetch gets a few tries with a
+// widening gap before giving up.
+async function withRetry(label, fn) {
+  let lastErr;
+  for (let i = 0; i < RETRIES; i++) {
+    try { return await fn(); }
+    catch (e) {
+      lastErr = e;
+      if (i < RETRIES - 1) {
+        const wait = 2000 * Math.pow(2, i);
+        log(`${label}: attempt ${i + 1} failed (${e.message}), retrying in ${wait / 1000}s`);
+        await new Promise(r => setTimeout(r, wait));
+      }
+    }
+  }
+  throw lastErr;
+}
 
 async function getJSON(url, opts = {}) {
   const ctrl = new AbortController();
@@ -345,6 +367,7 @@ async function collectRooftopActual(state, latest) {
   const at = nowISO();
   const out = [];
   let total = 0;
+  const failed = [];
   for (const variant of ["SATELLITE", "MEASUREMENT"]) {
     const key = "rooftop_actual_" + variant.toLowerCase();
     const files = await nemwebList(ROOFTOP_BASE + "ACTUAL/", "PUBLIC_ROOFTOP_PV_ACTUAL_" + variant + "_");
@@ -404,13 +427,20 @@ const ALL = { dispatch: collectDispatch, predispatch: collectPredispatch, wem: c
   const state = loadState();
   const latest = fs.existsSync(LATEST_FILE) ? JSON.parse(fs.readFileSync(LATEST_FILE, "utf8")) : {};
   let total = 0;
+  const failed = [];
   for (const job of jobs) {
     const fn = job === "scada" ? collectSCADA : ALL[job];
-    try { total += await fn(state, latest); }
-    catch (e) { log(`${job}: ERROR ${e.message}`); }
+    try { total += await withRetry(job, () => fn(state, latest)); }
+    catch (e) { log(`${job}: ERROR ${e.message}`); failed.push(job); }
   }
   latest._collected_at = nowISO();
   fs.writeFileSync(LATEST_FILE, JSON.stringify(latest, null, 2));
   saveState(state);
   log(`run complete: ${total} new rows across [${jobs.join(", ")}]`);
+  // A silent partial failure is how an archive quietly develops holes. Exit
+  // non-zero so a scheduled run surfaces as a failure instead of a green tick.
+  if (failed.length) {
+    log(`FAILED sources: ${failed.join(", ")}`);
+    process.exitCode = 1;
+  }
 })();
