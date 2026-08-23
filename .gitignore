@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log.bak
+# WEM facility SCADA is ~19 MB per pull — keep it out of git history
+data/wem_scada*.csv

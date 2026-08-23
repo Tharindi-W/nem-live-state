@@ -1,0 +1,46 @@
+name: Collect AEMO data
+
+# Always-on replacement for the Windows scheduled task: a laptop that sleeps
+# cannot be an archive. GitHub's cron is best-effort and often runs late under
+# load, so treat the cadence as "roughly every 10 minutes", not a guarantee.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Collect
+        run: node collect.js
+
+      - name: Commit new rows
+        run: |
+          git config user.name  "aemo-collector[bot]"
+          git config user.email "aemo-collector@users.noreply.github.com"
+          git add data
+          if git diff --staged --quiet; then
+            echo "no new rows"
+          else
+            git commit -m "data: collect $(date -u +'%Y-%m-%dT%H:%MZ')"
+            # The scheduled run and a manual run can race; rebase rather than fail.
+            for i in 1 2 3; do
+              git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push && exit 0
+              sleep 5
+            done
+            exit 1
+          fi

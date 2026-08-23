@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Australia as a Live World-Model Testbed</title>
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --paper: #ffffff;
+      --ink: #24324a;
+      --muted: #60708c;
+      --line: #dce7f3;
+      --blue: #2f74d0;
+      --blue-soft: #eaf4ff;
+      --cyan: #34a7b6;
+      --cyan-soft: #e8f8fa;
+      --coral: #e87a63;
+      --coral-soft: #fff0ec;
+      --gold: #d9a227;
+      --gold-soft: #fff7df;
+      --green: #2b9a74;
+      --green-soft: #e9f8f2;
+      --violet: #7b72d8;
+      --violet-soft: #f0efff;
+      --shadow: 0 18px 45px rgba(70, 104, 142, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #f5fbff 0%, #fffdf8 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: #2468b5; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: #154f8e; }
+    strong { color: #1f2d43; }
+
+    .shell { width: min(1180px, calc(100% - 36px)); margin: 0 auto; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(247, 251, 255, 0.95);
+      border-bottom: 1px solid var(--line);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+    .topbar-inner {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .brand { font-weight: 800; letter-spacing: -0.02em; }
+    nav { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 13px; }
+    nav a { text-decoration: none; color: #53647e; font-weight: 650; }
+
+    header.hero { padding: 82px 0 48px; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: #285f9f;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 22px 0 18px;
+      max-width: 980px;
+      font-size: clamp(42px, 7.3vw, 82px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+      color: #263b5f;
+    }
+    .lede {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(19px, 2.2vw, 27px);
+      line-height: 1.35;
+      color: #50617c;
+      letter-spacing: -0.015em;
+    }
+    .hero-grid {
+      margin-top: 34px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .metric {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 17px;
+      box-shadow: 0 10px 28px rgba(89, 117, 151, 0.08);
+    }
+    .metric b { display: block; font-size: 22px; color: #315e95; margin-bottom: 2px; }
+    .metric span { color: var(--muted); font-size: 13px; }
+
+    section { padding: 46px 0; scroll-margin-top: 74px; }
+    .section-head { max-width: 850px; margin-bottom: 26px; }
+    .kicker { color: var(--blue); font-size: 13px; font-weight: 850; text-transform: uppercase; letter-spacing: 0.09em; }
+    h2 { margin: 8px 0 10px; font-size: clamp(30px, 4.3vw, 49px); line-height: 1.06; letter-spacing: -0.04em; color: #2a3d60; }
+    h3 { margin: 0 0 8px; font-size: 20px; line-height: 1.22; letter-spacing: -0.02em; color: #2d456d; }
+    p { margin: 0 0 14px; }
+    .section-head p { color: var(--muted); font-size: 17px; }
+
+    .callout {
+      background: linear-gradient(135deg, #eaf4ff 0%, #f1fbf8 100%);
+      border: 1px solid #d1e6f3;
+      border-radius: var(--radius);
+      padding: clamp(24px, 4vw, 42px);
+      box-shadow: var(--shadow);
+    }
+    .callout .big {
+      font-size: clamp(24px, 3.2vw, 39px);
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+      color: #2c4a70;
+      max-width: 980px;
+    }
+    .callout .small { margin-top: 16px; color: #556983; max-width: 930px; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 12px 36px rgba(85, 113, 146, 0.08);
+    }
+    .card p, .card li { color: #596b85; }
+    .card ul { margin: 12px 0 0; padding-left: 19px; }
+    .card li { margin: 7px 0; }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .pill { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: 750; border: 1px solid transparent; }
+    .p-green { color: #247457; background: var(--green-soft); border-color: #ccecdf; }
+    .p-blue { color: #285f9f; background: var(--blue-soft); border-color: #d5e9ff; }
+    .p-gold { color: #8b681b; background: var(--gold-soft); border-color: #f1dfa6; }
+    .p-coral { color: #9a503f; background: var(--coral-soft); border-color: #f7d5cc; }
+    .p-violet { color: #5c56a9; background: var(--violet-soft); border-color: #dbd8ff; }
+
+    .table-wrap { overflow-x: auto; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 12px 34px rgba(85, 113, 146, 0.07); }
+    table { width: 100%; border-collapse: collapse; min-width: 940px; background: white; }
+    th, td { text-align: left; vertical-align: top; padding: 15px 14px; border-bottom: 1px solid #e8eef6; }
+    th { background: #f1f7fd; color: #3b5274; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+    td { font-size: 14px; color: #55667f; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .rank { font-weight: 850; color: #2e64a2; }
+    .score { white-space: nowrap; font-weight: 800; color: #30557e; }
+
+    .source-card { border-left: 6px solid var(--blue); }
+    .source-card.energy { border-left-color: var(--gold); }
+    .source-card.weather { border-left-color: var(--blue); }
+    .source-card.ocean { border-left-color: var(--cyan); }
+    .source-card.hazard { border-left-color: var(--coral); }
+    .source-card.transport { border-left-color: var(--violet); }
+    .source-card.environment { border-left-color: var(--green); }
+
+    .source-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+    .mini { background: #f7fafc; border: 1px solid #e6edf5; border-radius: 12px; padding: 10px; }
+    .mini span { display: block; color: #7a8799; font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.06em; }
+    .mini b { display: block; margin-top: 2px; font-size: 13px; color: #425a7a; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 22px;
+    }
+    .flow .node {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      color: #435d80;
+      font-size: 13px;
+      font-weight: 750;
+      position: relative;
+    }
+    .flow .node:not(:last-child)::after {
+      content: ">";
+      position: absolute;
+      right: -9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ab0c8;
+      font-size: 20px;
+      z-index: 2;
+    }
+
+    .quote {
+      padding: 22px 24px;
+      border-radius: 18px;
+      background: var(--gold-soft);
+      border: 1px solid #f1dfaa;
+      color: #66501e;
+      font-size: 18px;
+      font-weight: 720;
+    }
+
+    .repo { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; }
+    .repo .tag { font-size: 12px; font-weight: 800; padding: 6px 9px; border-radius: 999px; background: #edf4fb; color: #496583; white-space: nowrap; }
+
+    .priority {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .priority .primary { background: linear-gradient(140deg, #fff7df, #fffdf6); }
+    .priority .secondary { background: linear-gradient(140deg, #eaf4ff, #f8fbff); }
+
+    .steps { counter-reset: step; display: grid; gap: 14px; }
+    .step { background: white; border: 1px solid var(--line); border-radius: 18px; padding: 20px 20px 20px 68px; position: relative; }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--blue-soft);
+      color: #2d66a7;
+      font-weight: 850;
+    }
+    .step b { display: block; margin-bottom: 5px; }
+    .step span { color: var(--muted); }
+
+    .warn { background: var(--coral-soft); border: 1px solid #f1d0c8; border-radius: 18px; padding: 18px; color: #784d42; }
+    .good { background: var(--green-soft); border: 1px solid #cde9df; border-radius: 18px; padding: 18px; color: #376d5b; }
+
+    .sources { columns: 2; column-gap: 26px; }
+    .sources li { break-inside: avoid; margin: 0 0 10px; color: #5d6d83; }
+
+    footer { padding: 42px 0 70px; color: #758297; font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .hero-grid, .grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .priority { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .flow .node:not(:last-child)::after { content: "v"; right: auto; left: 50%; top: auto; bottom: -16px; transform: translateX(-50%); }
+      .source-meta { grid-template-columns: 1fr; }
+      .sources { columns: 1; }
+    }
+    @media (max-width: 620px) {
+      .shell { width: min(100% - 22px, 1180px); }
+      header.hero { padding-top: 54px; }
+      .hero-grid, .grid-3 { grid-template-columns: 1fr; }
+      .topbar-inner { align-items: flex-start; padding: 10px 0; flex-direction: column; gap: 6px; }
+      nav { font-size: 12px; }
+      section { padding: 34px 0; }
+      .repo { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      .topbar { display: none; }
+      body { background: white; }
+      .card, .callout, .table-wrap { box-shadow: none; }
+      a { color: #285f9f; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">Australia Live Systems Research</div>
+      <nav aria-label="Report navigation">
+        <a href="#thesis">Problem</a>
+        <a href="#landscape">Data landscape</a>
+        <a href="#ranking">Ranking</a>
+        <a href="#precedents">Pythia + MiroFish</a>
+        <a href="#start">How to start</a>
+        <a href="#sources">Sources</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="shell">
+      <span class="eyebrow">Research report | 20 August 2026</span>
+      <h1>Australia as a live testbed for AI that has to understand the world, not just describe it.</h1>
+      <p class="lede">The opportunity is not another dashboard and not another chatbot. The deeper problem is whether an AI system can maintain a continuously updated belief about a messy, partially observed physical world, forecast several possible futures, and stay calibrated as reality changes.</p>
+
+      <div class="hero-grid" aria-label="Summary metrics">
+        <div class="metric"><b>10+ domains</b><span>energy, weather, water, oceans, fire, seismic, mobility, air quality and more</span></div>
+        <div class="metric"><b>Seconds to minutes</b><span>update rates for several of the strongest feeds</span></div>
+        <div class="metric"><b>Continuous labels</b><span>the future arrives automatically, creating a natural forecast scorecard</span></div>
+        <div class="metric"><b>Global analogues</b><span>the same underlying problems exist in every major economy</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="thesis">
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">01 | The problem</div>
+          <h2>What are we actually trying to solve?</h2>
+          <p>A crisp problem definition for a team discussion, without prematurely locking into a model architecture.</p>
+        </div>
+
+        <div class="callout">
+          <div class="big">Can an AI system infer the hidden state of a live, high-dimensional environment from incomplete and asynchronous observations, then make calibrated forecasts about what happens next and how shocks propagate through the system?</div>
+          <div class="small">This is different from asking an LLM to summarize a stream. A useful system has to preserve state across time, distinguish signal from noise, handle missing observations, understand spatial structure, model feedback loops, represent uncertainty, update its beliefs when evidence arrives, and be scored against what actually happened.</div>
+        </div>
+
+        <div class="grid-3" style="margin-top:18px">
+          <div class="card">
+            <h3>Why ordinary LLMs struggle</h3>
+            <p>Text models are excellent at language and broad reasoning, but real systems are numerical, spatial, asynchronous and stateful. Compressing thousands of sensor observations into prose can throw away exactly the dynamics that matter.</p>
+          </div>
+          <div class="card">
+            <h3>Why this is scientifically interesting</h3>
+            <p>The target is not just prediction accuracy. It is state estimation, probabilistic forecasting, causal response, counterfactual reasoning and adaptation under distribution shift.</p>
+          </div>
+          <div class="card">
+            <h3>Why this can become valuable</h3>
+            <p>A small improvement in anticipating power prices, network disruption, fire spread, coastal risk, severe weather or asset stress can change real operational decisions with financial consequences.</p>
+          </div>
+        </div>
+
+        <div class="flow" aria-label="Problem flow">
+          <div class="node">Live, noisy observations</div>
+          <div class="node">Latent state estimate</div>
+          <div class="node">Multiple plausible futures</div>
+          <div class="node">Decision or intervention</div>
+          <div class="node">Reality arrives and scores us</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="landscape">
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">02 | Australian live-data landscape</div>
+          <h2>The strongest live and near-live systems</h2>
+          <p>This is a practical shortlist of major Australian sources with enough continuity, structure and consequence to support serious forecasting research. "Free" and "commercially reusable" are deliberately treated as separate questions.</p>
+        </div>
+
+        <div class="grid-2">
+          <article class="card source-card energy">
+            <h3>AEMO National Electricity Market</h3>
+            <p>The NEM is one of the best naturally occurring AI benchmarks in Australia. Public dispatch data updates every 5 minutes and includes regional demand, prices, interconnector flows, constraints, generation and ancillary services. Five-minute pre-dispatch also publishes short-term price and demand forecasts.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>5 minutes</b></div>
+              <div class="mini"><span>AI difficulty</span><b>Very high</b></div>
+              <div class="mini"><span>Commercial value</span><b>Exceptional</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> predict price spikes, congestion, renewable ramps, reserve stress and cascading effects from weather and outages. The graph structure changes and market participants react strategically.</p>
+            <p><strong>Access caveat:</strong> AEMO makes extensive public data available, but multiple public pages state that specific datasets are provided for information and are not intended for commercial use. This is excellent research data, but a commercial product needs explicit legal and licensing review.</p>
+            <div class="pill-row"><span class="pill p-gold">Huge economic signal</span><span class="pill p-blue">Public feed</span><span class="pill p-coral">Commercial terms review</span></div>
+            <p style="margin-top:14px"><a href="https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/market-management-system-mms-data/dispatch" target="_blank" rel="noopener">AEMO dispatch data</a> · <a href="https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/market-management-system-mms-data/pre-dispatch" target="_blank" rel="noopener">5-minute pre-dispatch</a> · <a href="https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem" target="_blank" rel="noopener">NEM data hub</a></p>
+          </article>
+
+          <article class="card source-card energy">
+            <h3>AEMO Wholesale Electricity Market, Western Australia</h3>
+            <p>The WEM and South West Interconnected System provide a second Australian electricity environment with demand, forecasts, dispatch, outages, prices, generation and fuel mix.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Operational / market</b></div>
+              <div class="mini"><span>AI difficulty</span><b>High</b></div>
+              <div class="mini"><span>Value</span><b>High</b></div>
+            </div>
+            <p><strong>Why it matters:</strong> a model that transfers between the NEM and WEM is more interesting than a model that only memorises one market. It starts testing generalisation across different grid and market structures.</p>
+            <div class="pill-row"><span class="pill p-gold">Energy</span><span class="pill p-violet">Transfer learning test</span></div>
+            <p style="margin-top:14px"><a href="https://www.aemo.com.au/energy-systems/electricity/wholesale-electricity-market-wem/data-wem" target="_blank" rel="noopener">AEMO WEM data</a></p>
+          </article>
+
+          <article class="card source-card energy">
+            <h3>AEMO Gas Bulletin Board</h3>
+            <p>The Gas Bulletin Board publishes up-to-date flow information across major production fields, demand centres, pipelines, storage and capacity outlooks across much of Australia.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Up-to-date operational data</b></div>
+              <div class="mini"><span>AI difficulty</span><b>High</b></div>
+              <div class="mini"><span>Value</span><b>Very high</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> infer supply stress and downstream price or reliability effects from flows, outages, maintenance, storage and weather. This is a natural cross-domain companion to electricity.</p>
+            <div class="pill-row"><span class="pill p-gold">Commodity infrastructure</span><span class="pill p-blue">Public website</span></div>
+            <p style="margin-top:14px"><a href="https://www.aemo.com.au/energy-systems/gas/gas-bulletin-board-gbb" target="_blank" rel="noopener">AEMO Gas Bulletin Board</a> · <a href="https://www.aemo.com.au/energy-systems/gas/gas-bulletin-board-gbb/data-gbb" target="_blank" rel="noopener">GBB data</a></p>
+          </article>
+
+          <article class="card source-card weather">
+            <h3>Bureau of Meteorology live weather</h3>
+            <p>BOM offers automated observations, warnings, radar and Himawari-9 imagery through web and anonymous FTP. State observation products can update every 10 minutes, radar images are issued every 5 minutes, and satellite imagery every 10 minutes.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>5 to 10 minutes</b></div>
+              <div class="mini"><span>AI difficulty</span><b>Extreme</b></div>
+              <div class="mini"><span>Value</span><b>Exceptional</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> spatial forecasting with genuine nonlinear dynamics. Radar nowcasting is especially attractive because every new image creates the next label automatically.</p>
+            <p><strong>Access caveat:</strong> BOM's anonymous automated feed is free but explicitly states it is not for commercial use. BOM also offers registered and paid access pathways. Treat the free feed as research-grade access, not a production licence.</p>
+            <div class="pill-row"><span class="pill p-blue">5-minute radar</span><span class="pill p-blue">10-minute satellite</span><span class="pill p-coral">Free feed non-commercial</span></div>
+            <p style="margin-top:14px"><a href="https://www.bom.gov.au/catalogue/data-feeds.shtml" target="_blank" rel="noopener">BOM Weather Data Services</a> · <a href="https://www.bom.gov.au/metadata/catalogue/license.shtml" target="_blank" rel="noopener">BOM data access and licences</a></p>
+          </article>
+
+          <article class="card source-card weather">
+            <h3>BOM Water Data Online</h3>
+            <p>Water Data Online provides free access to current and historical time series from roughly 6,000 water monitoring stations around Australia, including river level, discharge, storage, rainfall, conductivity, turbidity, pH and water temperature. It exposes an OGC Sensor Observation Service using WaterML2.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Coverage</span><b>~6,000 stations</b></div>
+              <div class="mini"><span>History</span><b>Some series from 1800s</b></div>
+              <div class="mini"><span>Value</span><b>High</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> flood and catchment state estimation from sparse sensors with long delays, local heterogeneity and extreme-event behaviour.</p>
+            <div class="pill-row"><span class="pill p-green">Free access</span><span class="pill p-blue">Sensor web standard</span></div>
+            <p style="margin-top:14px"><a href="https://www.bom.gov.au/waterdata/wiski-web-public/about.htm" target="_blank" rel="noopener">Water Data Online</a> · <a href="https://www.bom.gov.au/waterdata/wiski-web-public/faq.htm" target="_blank" rel="noopener">Water Data Online FAQ and SOS2 details</a></p>
+          </article>
+
+          <article class="card source-card ocean">
+            <h3>IMOS Live and the Australian Ocean Data Network</h3>
+            <p>IMOS Live, launched in April 2026, brings together near-real-time marine observations including satellite-derived products and wave buoy data. AODN supports direct access via Amazon S3, THREDDS, OPeNDAP and OGC services.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Near real-time</b></div>
+              <div class="mini"><span>Licence</span><b>Mostly CC BY 4.0</b></div>
+              <div class="mini"><span>Value</span><b>Very high</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> infer evolving ocean state from heterogeneous spatial fields and sparse point sensors. Valuable targets include wave risk, marine heat, coastal operations, offshore assets, shipping, aquaculture and insurance.</p>
+            <div class="pill-row"><span class="pill p-green">Strong reuse path</span><span class="pill p-cyan p-blue">Near real-time</span><span class="pill p-violet">Physics-rich</span></div>
+            <p style="margin-top:14px"><a href="https://imos.org.au/news/introducing-imos-live" target="_blank" rel="noopener">IMOS Live</a> · <a href="https://imos.org.au/data/access-ocean-data/direct-data-access" target="_blank" rel="noopener">Direct data access</a> · <a href="https://imos.org.au/conditions-of-use" target="_blank" rel="noopener">IMOS data licensing</a></p>
+          </article>
+
+          <article class="card source-card ocean">
+            <h3>IMOS Coastal Wave Buoys</h3>
+            <p>The national coastal wave buoy facility delivers near-real-time wave and temperature observations around Australia's coast.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Near real-time</b></div>
+              <div class="mini"><span>Domain</span><b>Coastal dynamics</b></div>
+              <div class="mini"><span>Value</span><b>High</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> forecasting local wave extremes and coastal impacts, especially when combined with weather, tides, bathymetry and infrastructure exposure.</p>
+            <div class="pill-row"><span class="pill p-green">CC BY path</span><span class="pill p-cyan p-blue">Operational sensor data</span></div>
+            <p style="margin-top:14px"><a href="https://imos.org.au/facility/coastal-wave-buoys" target="_blank" rel="noopener">IMOS Coastal Wave Buoys</a></p>
+          </article>
+
+          <article class="card source-card hazard">
+            <h3>Digital Earth Australia Hotspots</h3>
+            <p>DEA Hotspots is a national satellite-based fire hotspot service updated every 10 minutes. The public version is available to anyone and data access includes AWS, WMS, WFS, KML and GeoJSON. The product is licensed CC BY 4.0.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>10 minutes</b></div>
+              <div class="mini"><span>Licence</span><b>CC BY 4.0</b></div>
+              <div class="mini"><span>Value</span><b>Very high</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> convert point-like detections into evolving risk under wind, fuel, terrain, weather and observation latency. DEA explicitly says the product is not for safety-of-life decisions, which makes uncertainty handling central.</p>
+            <div class="pill-row"><span class="pill p-green">Open reuse</span><span class="pill p-coral">Hazards</span><span class="pill p-blue">Machine-readable</span></div>
+            <p style="margin-top:14px"><a href="https://knowledge.dea.ga.gov.au/data/product/dea-hotspots/" target="_blank" rel="noopener">DEA Hotspots</a> · <a href="https://data.dea.ga.gov.au/" target="_blank" rel="noopener">DEA public data</a></p>
+          </article>
+
+          <article class="card source-card hazard">
+            <h3>Geoscience Australia earthquakes</h3>
+            <p>The National Earthquake Alerts Centre operates 24/7, receives real-time seismic feeds from more than 100 Australian locations and more than 500 international locations, and detects and characterises events in near-real-time. Earthquakes@GA exposes event products including JSON, GeoJSON, KML and ShakeMap outputs.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Near real-time</b></div>
+              <div class="mini"><span>Signal</span><b>Waveforms + events</b></div>
+              <div class="mini"><span>Value</span><b>High, sparse events</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> rare-event detection, localisation and uncertainty under severe class imbalance. Less suitable as the first commercial wedge, but excellent for representation learning and anomaly detection.</p>
+            <div class="pill-row"><span class="pill p-coral">Rare events</span><span class="pill p-violet">Anomaly detection</span></div>
+            <p style="margin-top:14px"><a href="https://www.ga.gov.au/scientific-topics/community-safety/data-and-products/neac" target="_blank" rel="noopener">National Earthquake Alerts Centre</a> · <a href="https://earthquakes.ga.gov.au/help" target="_blank" rel="noopener">Earthquakes@GA formats</a></p>
+          </article>
+
+          <article class="card source-card transport">
+            <h3>Transport for NSW GTFS Realtime</h3>
+            <p>TfNSW publishes real-time vehicle positions, trip updates and alerts for major public transport modes. Current documentation says GTFS-R data can update around every 15 seconds, while an earlier developer guide documents 10 to 30 second refreshes by mode. Access requires a free account and API key, with default quotas.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>~10 to 30 seconds</b></div>
+              <div class="mini"><span>Licence</span><b>CC Attribution on key datasets</b></div>
+              <div class="mini"><span>Value</span><b>Very high</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> cascading delay prediction on a changing graph where vehicles, passengers, incidents, schedules and recovery actions interact.</p>
+            <div class="pill-row"><span class="pill p-green">Free key</span><span class="pill p-violet">Graph dynamics</span><span class="pill p-blue">Fast labels</span></div>
+            <p style="margin-top:14px"><a href="https://opendata.transport.nsw.gov.au/developers/documentation" target="_blank" rel="noopener">TfNSW documentation</a> · <a href="https://opendata.transport.nsw.gov.au/developers/api-basics" target="_blank" rel="noopener">API key and limits</a> · <a href="https://opendata.transport.nsw.gov.au/data/dataset/?res_format=api&amp;tags=gtfs&amp;tags=realtime" target="_blank" rel="noopener">Realtime datasets</a></p>
+          </article>
+
+          <article class="card source-card transport">
+            <h3>Transport Victoria GTFS Realtime</h3>
+            <p>Victoria publishes GTFS-R trip updates, service alerts and vehicle positions for trains, trams, buses and V/Line. Metro trains and buses are near real-time and trams refresh every 60 seconds. Access uses an API key. The collection is licensed CC BY 4.0.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Near real-time / 60 sec</b></div>
+              <div class="mini"><span>Licence</span><b>CC BY 4.0</b></div>
+              <div class="mini"><span>Value</span><b>Very high</b></div>
+            </div>
+            <p><strong>Why it matters:</strong> Victoria plus NSW gives a natural test of geographic transfer without changing the basic GTFS-R representation.</p>
+            <div class="pill-row"><span class="pill p-green">CC BY 4.0</span><span class="pill p-violet">Cross-city transfer</span></div>
+            <p style="margin-top:14px"><a href="https://opendata.transport.vic.gov.au/dataset/gtfs-realtime" target="_blank" rel="noopener">Transport Victoria GTFS Realtime</a></p>
+          </article>
+
+          <article class="card source-card transport">
+            <h3>Victorian roads and disruption APIs</h3>
+            <p>Transport Victoria's unplanned road disruption API refreshes every 60 seconds and is licensed CC BY 4.0. It includes location, disruption type, lanes closed and public advice. Near-real-time Bluetooth travel-time data also exists, although that dataset is CC BY-NC 4.0 rather than commercially open.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>60 seconds</b></div>
+              <div class="mini"><span>Licence</span><b>Mixed</b></div>
+              <div class="mini"><span>Value</span><b>High</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> estimate traffic state and disruption duration from incomplete incident data, then predict knock-on effects across the road network and public transport.</p>
+            <div class="pill-row"><span class="pill p-green">Disruptions CC BY</span><span class="pill p-coral">Travel time NC licence</span></div>
+            <p style="margin-top:14px"><a href="https://opendata.transport.vic.gov.au/dataset/unplanned-disruptions-road" target="_blank" rel="noopener">Unplanned road disruptions</a> · <a href="https://opendata.transport.vic.gov.au/dataset/bluetooth-travel-time" target="_blank" rel="noopener">Bluetooth travel time</a></p>
+          </article>
+
+          <article class="card source-card environment">
+            <h3>NSW air quality</h3>
+            <p>NSW publishes near-real-time air quality and meteorological data through an open API, with records extending back to 1994. The current Data.NSW listing is Creative Commons Attribution and describes the update frequency as continual.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Near real-time</b></div>
+              <div class="mini"><span>History</span><b>Since 1994</b></div>
+              <div class="mini"><span>Licence</span><b>CC Attribution</b></div>
+            </div>
+            <p><strong>Hard problem:</strong> pollution is an interacting result of weather, smoke, traffic, industry and geography. It is ideal for testing whether a model captures causal context rather than simple autocorrelation.</p>
+            <div class="pill-row"><span class="pill p-green">Open API</span><span class="pill p-green">Long history</span></div>
+            <p style="margin-top:14px"><a href="https://data.nsw.gov.au/data/en/dataset/nsw-air-quality-data-services" target="_blank" rel="noopener">NSW Air Quality Data Services</a></p>
+          </article>
+
+          <article class="card source-card environment">
+            <h3>EPA Victoria AirWatch API</h3>
+            <p>EPA Victoria monitors air quality 24/7 and publishes hourly data and ratings. Its developer portal provides an environment monitoring API for real-time information, with sign-up and API keys.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Hourly</b></div>
+              <div class="mini"><span>Access</span><b>Free developer sign-up</b></div>
+              <div class="mini"><span>Value</span><b>Medium to high</b></div>
+            </div>
+            <p><strong>Why it matters:</strong> paired with NSW, it gives a second jurisdiction for evaluating transfer and calibration.</p>
+            <div class="pill-row"><span class="pill p-green">Developer API</span><span class="pill p-blue">24/7 monitoring</span></div>
+            <p style="margin-top:14px"><a href="https://www.epa.vic.gov.au/check-air-and-water-quality" target="_blank" rel="noopener">EPA Victoria AirWatch</a> · <a href="https://portal.api.epa.vic.gov.au/" target="_blank" rel="noopener">EPA developer portal</a></p>
+          </article>
+
+          <article class="card source-card weather">
+            <h3>BOM Space Weather API</h3>
+            <p>BOM's Space Weather API provides near-real-time Australian geomagnetic indices, alerts and warnings. It requires registration and an API key and is currently available at no charge.</p>
+            <div class="source-meta">
+              <div class="mini"><span>Cadence</span><b>Near real-time</b></div>
+              <div class="mini"><span>Access</span><b>Free registration</b></div>
+              <div class="mini"><span>Value</span><b>Niche but strategic</b></div>
+            </div>
+            <p><strong>Usefulness:</strong> not a first business wedge, but an interesting stress-test for rare exogenous shocks affecting communications, aviation, satellites and power systems.</p>
+            <div class="pill-row"><span class="pill p-blue">Exogenous shocks</span><span class="pill p-violet">Cross-domain</span></div>
+            <p style="margin-top:14px"><a href="https://sws-data.sws.bom.gov.au/index" target="_blank" rel="noopener">BOM Space Weather API</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="ranking">
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">03 | Priority ranking</div>
+          <h2>Where the strongest problem and strongest business case overlap</h2>
+          <p>The score is deliberately about the quality of the problem, not just the beauty of the dataset. A perfect dataset with no consequential decision attached is less interesting.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>System</th><th>Why AI has a hard time</th><th>Live data</th><th>Commercial signal</th><th>Global transfer</th><th>Overall</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="rank">1</td><td><strong>Electricity grid + market</strong></td><td>Graph constraints, renewable uncertainty, strategic bids, outages, feedback loops, regime shifts.</td><td>Excellent</td><td>Exceptional</td><td>Exceptional</td><td class="score">9.6 / 10</td></tr>
+              <tr><td class="rank">2</td><td><strong>Weather + radar + satellite</strong></td><td>True nonlinear dynamics, multi-scale spatial fields, extremes, uncertainty grows quickly.</td><td>Excellent</td><td>Exceptional</td><td>Exceptional</td><td class="score">9.5 / 10</td></tr>
+              <tr><td class="rank">3</td><td><strong>Public transport + roads</strong></td><td>Dynamic graph, cascading delays, human intervention, demand feedback, heterogeneous modes.</td><td>Excellent</td><td>Very high</td><td>Exceptional via GTFS-R</td><td class="score">9.1 / 10</td></tr>
+              <tr><td class="rank">4</td><td><strong>Ocean + coastal risk</strong></td><td>Partial observation, fluid dynamics, sparse sensors, multi-scale coupling.</td><td>Very good</td><td>Very high</td><td>Exceptional</td><td class="score">8.9 / 10</td></tr>
+              <tr><td class="rank">5</td><td><strong>Bushfire + weather + land state</strong></td><td>Rare extremes, observation latency, nonlinear spread, terrain, fuels, weather coupling.</td><td>Very good</td><td>Very high</td><td>Very high</td><td class="score">8.8 / 10</td></tr>
+              <tr><td class="rank">6</td><td><strong>Gas infrastructure</strong></td><td>Network flow, outages, maintenance, demand response, commodity coupling.</td><td>Good</td><td>Very high</td><td>Very high</td><td class="score">8.4 / 10</td></tr>
+              <tr><td class="rank">7</td><td><strong>Air quality</strong></td><td>Weather, traffic, smoke, industry and chemistry interact, with local spatial effects.</td><td>Good</td><td>High</td><td>Very high</td><td class="score">8.0 / 10</td></tr>
+              <tr><td class="rank">8</td><td><strong>Water and catchments</strong></td><td>Sparse sensing, storage, rainfall, nonlinear runoff, delayed response and extremes.</td><td>Good</td><td>High</td><td>Very high</td><td class="score">7.9 / 10</td></tr>
+              <tr><td class="rank">9</td><td><strong>Earthquakes</strong></td><td>Extreme class imbalance and rare events. Detection and localisation are better targets than long-range prediction.</td><td>Excellent</td><td>Moderate</td><td>High</td><td class="score">7.2 / 10</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="priority" style="margin-top:18px">
+          <div class="card primary">
+            <h3>Best research wedge: electricity</h3>
+            <p>The NEM gives fast labels, hard dynamics and obvious economic value. Forecasts can be scored every five minutes. The most compelling research question is whether a persistent state model can beat strong tabular/time-series baselines and a Pythia-style text-plus-LLM benchmark, especially during rare price or constraint regimes.</p>
+            <div class="warn"><strong>Important:</strong> use AEMO public feeds for research only until data reuse terms are reviewed. A commercial implementation may need a separate licensed data path or customer-provided market data.</div>
+          </div>
+          <div class="card secondary">
+            <h3>Cleanest open-data wedge: ocean, hazards, air and transport</h3>
+            <p>IMOS, DEA Hotspots, NSW air quality and several transport feeds have clearer Creative Commons reuse paths. They are ideal for an early prototype whose data rights are easier to explain to partners.</p>
+            <div class="good"><strong>Advantage:</strong> these domains also naturally combine. For example, weather plus fire hotspots plus air quality, or ocean plus weather plus coastal assets.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">04 | Why this is more than forecasting</div>
+          <h2>The real benchmark is state, uncertainty and consequence</h2>
+          <p>Predicting the next number is useful, but it is not yet evidence of a world model.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>State estimation</h3>
+            <p>Can the system infer important hidden variables that are not directly observed, and keep those beliefs consistent as new sensors arrive at different times?</p>
+          </div>
+          <div class="card">
+            <h3>Multi-step forecasting</h3>
+            <p>Does it remain stable when rolled forward, or does error explode? Can it forecast trajectories rather than one-step point estimates?</p>
+          </div>
+          <div class="card">
+            <h3>Uncertainty calibration</h3>
+            <p>If it says 70 percent, do events actually occur about 70 percent of the time? GenCast's success is a useful reminder that uncertainty is not a side feature in chaotic systems.</p>
+          </div>
+          <div class="card">
+            <h3>Cross-system effects</h3>
+            <p>Can a weather shock alter the model's beliefs about electricity, transport, smoke or coastal risk in the right direction and at the right timescale?</p>
+          </div>
+          <div class="card">
+            <h3>Counterfactuals</h3>
+            <p>What happens if an interconnector fails, a train line closes, wind production falls, a fire jumps a containment line, or a storm track shifts? A useful system should reason about interventions, not only extrapolate.</p>
+          </div>
+          <div class="card">
+            <h3>Distribution shift</h3>
+            <p>The important moments are often the rare ones. The system has to notice when the current regime is unlike its training history and widen uncertainty instead of becoming confidently wrong.</p>
+          </div>
+        </div>
+
+        <div class="quote" style="margin-top:18px">A strong result is not "our model predicts well on average." A strong result is "our model remains calibrated when the system enters a regime that matters operationally."</div>
+      </div>
+    </section>
+
+    <section id="precedents">
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">05 | GitHub precedents worth studying</div>
+          <h2>Pythia, MiroFish and Osiris are directly relevant</h2>
+          <p>They should be in the conversation because they demonstrate strong developer interest in live world state, forecasting and simulation. They also help expose the gap between live-data fusion and a learned dynamical world model.</p>
+        </div>
+
+        <div class="grid-2">
+          <article class="card repo">
+            <div>
+              <h3>Pythia by <a href="https://github.com/jangles-byte" target="_blank" rel="noopener">jangles-byte</a></h3>
+              <p>Pythia combines live global feeds, a local LLM forecasting layer, a forecast ledger, what-if analysis and a specialist council. It is MIT licensed and explicitly positions itself as a way to give agents a live view of world events plus forecasts.</p>
+              <p><strong>Why it matters here:</strong> Pythia is an excellent baseline for the thesis. Its current pipeline groups events into a compact prose world brief, sends that brief to an LLM for predictions, and then has LLM personas re-score forecasts. That is powerful, but it is still primarily text-mediated reasoning over a compressed snapshot.</p>
+              <p><a href="https://github.com/jangles-byte/Pythia" target="_blank" rel="noopener">Repository</a> · <a href="https://github.com/jangles-byte/Pythia/blob/main/engine/world_state.py" target="_blank" rel="noopener">world_state.py</a> · <a href="https://github.com/jangles-byte/Pythia/blob/main/engine/oracle.py" target="_blank" rel="noopener">oracle.py</a> · <a href="https://github.com/jangles-byte/Pythia/blob/main/engine/swarm.py" target="_blank" rel="noopener">swarm.py</a></p>
+            </div>
+            <span class="tag">MIT</span>
+          </article>
+
+          <article class="card repo">
+            <div>
+              <h3>MiroFish by <a href="https://github.com/666ghj" target="_blank" rel="noopener">666ghj</a></h3>
+              <p>MiroFish presents itself as a swarm-intelligence prediction engine that constructs a parallel digital world from seed information, generates agents with memory and behaviour, and runs social simulation before generating reports.</p>
+              <p><strong>Why it matters here:</strong> it takes simulation and emergence seriously. It is conceptually closer to "rehearse possible futures" than a standard forecasting dashboard. It is especially relevant for human and institutional systems where agent interactions matter.</p>
+              <p><strong>Commercial note:</strong> the repository is AGPL-3.0. Study the ideas freely, but direct incorporation into a proprietary product needs careful licence review.</p>
+              <p><a href="https://github.com/666ghj/MiroFish" target="_blank" rel="noopener">Repository</a> · <a href="https://mirofish.ai" target="_blank" rel="noopener">Project site</a></p>
+            </div>
+            <span class="tag">AGPL-3.0</span>
+          </article>
+
+          <article class="card repo">
+            <div>
+              <h3>Osiris by <a href="https://github.com/simplifaisoul" target="_blank" rel="noopener">simplifaisoul</a></h3>
+              <p>Osiris is an open-source real-time global intelligence platform and is one of the feed-layer projects Pythia builds on.</p>
+              <p><strong>Why it matters here:</strong> it is evidence that normalising many live sources into a single world-state surface has stand-alone value. For this research direction, the more interesting next question is what learns the dynamics after the live state has been assembled.</p>
+              <p><a href="https://github.com/simplifaisoul/osiris" target="_blank" rel="noopener">Repository</a></p>
+            </div>
+            <span class="tag">MIT</span>
+          </article>
+
+          <article class="card repo">
+            <div>
+              <h3>Aurora by Microsoft Research</h3>
+              <p>Aurora is a concrete proof that a model trained on heterogeneous Earth-system data can learn transferable dynamics. The Nature paper reports a foundation model trained on more than one million hours of geophysical data and strong results across weather, air quality, waves and tropical cyclone tracks.</p>
+              <p><strong>Why it matters here:</strong> it shows the core thesis is not science fiction. A shared latent representation can transfer across related physical tasks. The unanswered opportunity is how far this idea can extend into cyber-physical systems such as grids, mobility and infrastructure.</p>
+              <p><a href="https://www.microsoft.com/en-us/research/publication/aurora-a-foundation-model-for-the-earth-system/" target="_blank" rel="noopener">Microsoft Research paper page</a> · <a href="https://github.com/microsoft/aurora" target="_blank" rel="noopener">GitHub</a></p>
+            </div>
+            <span class="tag">Research precedent</span>
+          </article>
+        </div>
+
+        <div class="card" style="margin-top:18px">
+          <h3>What these projects collectively suggest</h3>
+          <p><strong>Pythia and Osiris:</strong> live world-state aggregation is practical. <strong>MiroFish:</strong> simulation and multi-agent emergence are compelling for social systems. <strong>Aurora, GraphCast and GenCast:</strong> learned dynamics can beat or complement expensive physical forecasting pipelines in structured Earth systems.</p>
+          <p>The open question worth attacking is therefore not "can we connect more feeds?" It is "can we learn a persistent, calibrated representation of a live operational system that predicts consequences better than strong domain baselines and text-centric agent systems?"</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">06 | Why Australia is unusually useful</div>
+          <h2>A country-sized laboratory with public instrumentation</h2>
+          <p>The combination matters more than any one dataset.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card"><h3>Fast feedback</h3><p>Power dispatch, transport movement, road incidents, radar and fire observations update quickly enough to run continuous forecast experiments and get ground truth the same day.</p></div>
+          <div class="card"><h3>Natural extremes</h3><p>Bushfires, severe storms, heat, floods, coastal hazards and renewable ramps create exactly the regime changes that expose weak models.</p></div>
+          <div class="card"><h3>Strong open-data culture</h3><p>DEA, IMOS, transport agencies and environmental agencies publish substantial machine-readable data, often with standard formats or Creative Commons licences.</p></div>
+          <div class="card"><h3>Multiple jurisdictions</h3><p>NSW and Victoria give comparable but non-identical transport and environmental systems. NEM and WEM give different electricity regimes. Transfer can be tested inside one country.</p></div>
+          <div class="card"><h3>Global problem shapes</h3><p>Electricity grids, GTFS-R mobility, weather, ocean observations, wildfire monitoring and air pollution all have international equivalents. The research can transfer beyond Australia.</p></div>
+          <div class="card"><h3>Commercial consequence</h3><p>Energy, logistics, insurance, infrastructure, emergency management, mining, agriculture, coastal operations and transport all pay for better anticipation of system state and risk.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="start">
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">07 | How to start without overbuilding</div>
+          <h2>Start with a falsifiable benchmark, not a grand platform</h2>
+          <p>The fastest way to learn whether there is something real here is to create an evaluation loop where failure is obvious.</p>
+        </div>
+
+        <div class="steps">
+          <div class="step"><b>Write one problem sentence.</b><span>Example: "Given the live state of the NEM at time t, forecast the probability distribution of regional price, demand, constraint activation and interconnector flow over the next 5, 15, 30 and 60 minutes." Keep the initial target measurable.</span></div>
+          <div class="step"><b>Create the source and licence registry before the model.</b><span>For every feed record URL, owner, update cadence, schema, history, access method, rate limit, licence, attribution requirement and whether commercial use is explicit, restricted or unclear.</span></div>
+          <div class="step"><b>Archive the live stream from day one.</b><span>Public sites frequently keep short rolling windows. A research system needs its own timestamped archive so that every forecast can be reproduced and scored later.</span></div>
+          <div class="step"><b>Build brutally strong baselines.</b><span>Persistence, seasonal averages, gradient-boosted trees, temporal convolution, graph/time-series models, official forecasts where available, and a Pythia-style LLM baseline. A new idea matters only if it beats something credible.</span></div>
+          <div class="step"><b>Score probability, not just point error.</b><span>Use Brier score, log loss, calibration curves, interval coverage and event-specific metrics. Separately score common periods and rare high-impact regimes.</span></div>
+          <div class="step"><b>Test transfer.</b><span>If the first environment is NSW transport, evaluate zero-shot or light fine-tuning on Victoria. If the first environment is energy, test whether representations transfer between regions or between NEM and WEM tasks.</span></div>
+          <div class="step"><b>Add one interacting system only after the first benchmark works.</b><span>Examples: weather into electricity, road incidents into public transport, weather and hotspots into air quality, weather into ocean waves. This is where cross-system state becomes scientifically interesting.</span></div>
+          <div class="step"><b>Only then ask what customers will pay for.</b><span>The product should emerge from a measurable forecasting advantage or a measurable reduction in decision latency, not from a generic "AI for live data" pitch.</span></div>
+        </div>
+
+        <div class="callout" style="margin-top:22px">
+          <div class="big">First milestone: a continuously running leaderboard where every model makes timestamped probabilistic forecasts and cannot rewrite history after reality arrives.</div>
+          <div class="small">Pythia's public forecast-ledger idea is directionally excellent. Borrow the discipline: every prediction gets a timestamp, horizon, probability and eventual resolution. The research becomes much more credible when the scorecard is automatic and unforgiving.</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">08 | Commercial lens</div>
+          <h2>Where the economic value can become very large</h2>
+          <p>These are problem categories, not product commitments.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="card"><h3>Energy operations and trading</h3><p>Price and congestion forecasting, renewable uncertainty, storage dispatch, outage risk, reserve stress and asset scheduling. Small improvements can affect high-value decisions frequently.</p></div>
+          <div class="card"><h3>Insurance and catastrophe risk</h3><p>Live updates to hazard probability and exposure as weather, fire, flood, waves or seismic events evolve. The valuable output is a changing distribution of loss, not a static alert.</p></div>
+          <div class="card"><h3>Transport and logistics</h3><p>Predict network recovery, delay propagation, route reliability and downstream capacity impacts rather than merely reporting where a disruption already exists.</p></div>
+          <div class="card"><h3>Mining and remote infrastructure</h3><p>Weather, roads, power, water and logistics interact. A system that understands cross-domain operational risk could be more valuable than separate dashboards.</p></div>
+          <div class="card"><h3>Coastal and maritime operations</h3><p>Wave, wind, current and temperature forecasts affect ports, offshore construction, aquaculture, vessels and coastal infrastructure.</p></div>
+          <div class="card"><h3>Government and emergency management</h3><p>Resource positioning, scenario planning and cascading-impact forecasts across fire, flood, roads, health and infrastructure. This demands careful safety boundaries and human oversight.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">09 | Global scale</div>
+          <h2>Why an Australian benchmark can become a worldwide capability</h2>
+          <p>The key is to learn problem structure that recurs internationally, not Australia-specific trivia.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Australian testbed</th><th>Portable representation</th><th>International analogue</th><th>Why scale is plausible</th></tr></thead>
+            <tbody>
+              <tr><td>NEM / WEM</td><td>Grid graph, bids, generation, load, constraints, weather</td><td>US ISOs, European power markets, UK, Singapore and others</td><td>Power markets differ in rules but share physical network constraints and uncertainty.</td></tr>
+              <tr><td>NSW / Victoria GTFS-R</td><td>Stops, routes, trips, vehicles, alerts, delays</td><td>Thousands of GTFS and GTFS-R transit systems</td><td>The data standard itself is global.</td></tr>
+              <tr><td>BOM / DEA weather and fire</td><td>Spatiotemporal fields, radar, satellite, hazards</td><td>NOAA, ECMWF, NASA FIRMS, national weather agencies</td><td>Physical dynamics transfer more naturally than language-specific workflows.</td></tr>
+              <tr><td>IMOS / AODN</td><td>Waves, SST, currents, buoys, satellite products</td><td>Argo, NOAA, Copernicus Marine and regional observing systems</td><td>Ocean state is global and heavily standardised.</td></tr>
+              <tr><td>Air quality</td><td>Pollution + meteorology + geography</td><td>National and city sensor networks globally</td><td>The same causal drivers recur with different local mixes.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">10 | Data rights and operational reality</div>
+          <h2>Publicly visible does not automatically mean product-ready</h2>
+          <p>This is one of the most important findings from the source review.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Strong reuse candidates</h3>
+            <ul>
+              <li>IMOS data: generally CC BY 4.0, with attribution requirements.</li>
+              <li>DEA Hotspots: CC BY 4.0 and multiple machine-readable access methods.</li>
+              <li>NSW air quality: Creative Commons Attribution in Data.NSW.</li>
+              <li>Transport Victoria GTFS-R and unplanned disruptions: CC BY 4.0, with API-key access.</li>
+              <li>Several TfNSW realtime datasets: Creative Commons Attribution, with free account and API key.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Research first, legal review before product</h3>
+            <ul>
+              <li>BOM anonymous feeds: free, but explicitly not for commercial use.</li>
+              <li>AEMO pages for dispatch, demand and pre-dispatch: public, but specific pages state data is not intended for commercial use.</li>
+              <li>Transport Victoria Bluetooth travel time: CC BY-NC 4.0.</li>
+              <li>Any source whose public website is easy to scrape but does not publish a reuse licence should be treated as unclear, not assumed open.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="warn" style="margin-top:18px"><strong>Commercial rule:</strong> the prototype data stack and the eventual production data stack do not have to be identical. The research question can be validated using public non-commercial feeds, then production can use licensed feeds, customer-owned telemetry or negotiated access. What matters now is being explicit about the boundary.</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">11 | Research evidence</div>
+          <h2>There is already strong evidence that learned dynamics can matter</h2>
+          <p>The relevant lesson from modern forecasting models is not that one architecture solves every domain. It is that structured models of state evolution can outperform expensive or purely descriptive approaches.</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>World Models</h3>
+            <p>Ha and Schmidhuber's 2018 work formalised the idea of learning a compressed spatial and temporal representation of an environment and using the learned model for downstream control.</p>
+            <p><a href="https://arxiv.org/abs/1803.10122" target="_blank" rel="noopener">World Models paper</a></p>
+          </div>
+          <div class="card">
+            <h3>GraphCast</h3>
+            <p>DeepMind demonstrated that graph-based learned dynamics can produce highly skilful global medium-range weather forecasts quickly.</p>
+            <p><a href="https://deepmind.google/blog/graphcast-ai-model-for-faster-and-more-accurate-global-weather-forecasting/" target="_blank" rel="noopener">GraphCast overview</a></p>
+          </div>
+          <div class="card">
+            <h3>GenCast</h3>
+            <p>GenCast shifted the emphasis toward probabilistic ensembles, with the Nature paper reporting stronger skill than ECMWF ENS across most evaluated targets and better handling of extreme-weather risk.</p>
+            <p><a href="https://www.nature.com/articles/s41586-024-08252-9" target="_blank" rel="noopener">GenCast in Nature</a></p>
+          </div>
+          <div class="card">
+            <h3>Aurora</h3>
+            <p>Aurora shows that a shared Earth-system representation can be fine-tuned across air quality, ocean waves, tropical cyclone tracks and weather. This is particularly relevant to the idea of learning reusable dynamics rather than one isolated predictor.</p>
+            <p><a href="https://www.nature.com/articles/s41586-025-09005-y" target="_blank" rel="noopener">Aurora in Nature</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="shell">
+        <div class="section-head">
+          <div class="kicker">12 | Source register</div>
+          <h2>Primary links used in this report</h2>
+          <p>Official sources were preferred for cadence, access and licensing claims. GitHub links are direct project sources. Access terms can change, so re-check licences before a commercial dependency is created.</p>
+        </div>
+
+        <div class="card">
+          <ol class="sources">
+            <li><a href="https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/market-management-system-mms-data/dispatch" target="_blank" rel="noopener">AEMO NEM Dispatch</a></li>
+            <li><a href="https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/market-management-system-mms-data/pre-dispatch" target="_blank" rel="noopener">AEMO NEM Pre-dispatch</a></li>
+            <li><a href="https://www.aemo.com.au/energy-systems/electricity/wholesale-electricity-market-wem/data-wem" target="_blank" rel="noopener">AEMO WEM Data</a></li>
+            <li><a href="https://www.aemo.com.au/energy-systems/gas/gas-bulletin-board-gbb" target="_blank" rel="noopener">AEMO Gas Bulletin Board</a></li>
+            <li><a href="https://www.bom.gov.au/catalogue/data-feeds.shtml" target="_blank" rel="noopener">BOM Weather Data Services</a></li>
+            <li><a href="https://www.bom.gov.au/metadata/catalogue/license.shtml" target="_blank" rel="noopener">BOM Data Access and Licences</a></li>
+            <li><a href="https://www.bom.gov.au/waterdata/wiski-web-public/about.htm" target="_blank" rel="noopener">BOM Water Data Online</a></li>
+            <li><a href="https://sws-data.sws.bom.gov.au/index" target="_blank" rel="noopener">BOM Space Weather API</a></li>
+            <li><a href="https://imos.org.au/news/introducing-imos-live" target="_blank" rel="noopener">IMOS Live</a></li>
+            <li><a href="https://imos.org.au/data/access-ocean-data/direct-data-access" target="_blank" rel="noopener">IMOS Direct Data Access</a></li>
+            <li><a href="https://imos.org.au/conditions-of-use" target="_blank" rel="noopener">IMOS Conditions of Use</a></li>
+            <li><a href="https://imos.org.au/facility/coastal-wave-buoys" target="_blank" rel="noopener">IMOS Coastal Wave Buoys</a></li>
+            <li><a href="https://knowledge.dea.ga.gov.au/data/product/dea-hotspots/" target="_blank" rel="noopener">DEA Hotspots</a></li>
+            <li><a href="https://data.dea.ga.gov.au/" target="_blank" rel="noopener">DEA Public Data</a></li>
+            <li><a href="https://www.ga.gov.au/scientific-topics/community-safety/data-and-products/neac" target="_blank" rel="noopener">Geoscience Australia NEAC</a></li>
+            <li><a href="https://earthquakes.ga.gov.au/help" target="_blank" rel="noopener">Earthquakes@GA</a></li>
+            <li><a href="https://opendata.transport.nsw.gov.au/developers/documentation" target="_blank" rel="noopener">Transport for NSW Documentation</a></li>
+            <li><a href="https://opendata.transport.nsw.gov.au/developers/api-basics" target="_blank" rel="noopener">TfNSW API Basics</a></li>
+            <li><a href="https://opendata.transport.vic.gov.au/dataset/gtfs-realtime" target="_blank" rel="noopener">Transport Victoria GTFS Realtime</a></li>
+            <li><a href="https://opendata.transport.vic.gov.au/dataset/unplanned-disruptions-road" target="_blank" rel="noopener">Victoria Unplanned Road Disruptions</a></li>
+            <li><a href="https://opendata.transport.vic.gov.au/dataset/bluetooth-travel-time" target="_blank" rel="noopener">Victoria Bluetooth Travel Time</a></li>
+            <li><a href="https://data.nsw.gov.au/data/en/dataset/nsw-air-quality-data-services" target="_blank" rel="noopener">NSW Air Quality Data Services</a></li>
+            <li><a href="https://www.epa.vic.gov.au/check-air-and-water-quality" target="_blank" rel="noopener">EPA Victoria AirWatch</a></li>
+            <li><a href="https://portal.api.epa.vic.gov.au/" target="_blank" rel="noopener">EPA Victoria Developer Portal</a></li>
+            <li><a href="https://github.com/jangles-byte/Pythia" target="_blank" rel="noopener">jangles-byte / Pythia</a></li>
+            <li><a href="https://github.com/666ghj/MiroFish" target="_blank" rel="noopener">666ghj / MiroFish</a></li>
+            <li><a href="https://github.com/simplifaisoul/osiris" target="_blank" rel="noopener">simplifaisoul / Osiris</a></li>
+            <li><a href="https://arxiv.org/abs/1803.10122" target="_blank" rel="noopener">Ha &amp; Schmidhuber, World Models</a></li>
+            <li><a href="https://deepmind.google/blog/graphcast-ai-model-for-faster-and-more-accurate-global-weather-forecasting/" target="_blank" rel="noopener">DeepMind GraphCast</a></li>
+            <li><a href="https://www.nature.com/articles/s41586-024-08252-9" target="_blank" rel="noopener">GenCast, Nature</a></li>
+            <li><a href="https://www.nature.com/articles/s41586-025-09005-y" target="_blank" rel="noopener">Aurora, Nature</a></li>
+            <li><a href="https://github.com/microsoft/aurora" target="_blank" rel="noopener">Microsoft Aurora GitHub</a></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <p><strong>Research note:</strong> This report is a technical opportunity assessment, not legal advice or a safety system specification. Data licences, API quotas and service availability can change. Reconfirm primary-source terms before using any feed in a commercial product.</p>
+      <p>Prepared as a shareable discussion document. Light theme, system fonts and dependency-free HTML are used for compatibility with current Safari and Google Chrome.</p>
+    </div>
+  </footer>
+</body>
+</html>
