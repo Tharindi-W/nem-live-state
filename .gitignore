@@ -8,3 +8,7 @@ data/wem_scada*.csv
 # Regenerated every run and append-only, so it conflicts between the scheduled
 # Actions run and any local run. The Actions log already records CI collection.
 data/collect.log
+
+# Machine-specific permission grants. The .local suffix means exactly that,
+# and the entries embed local filesystem paths.
+.claude/settings.local.json
