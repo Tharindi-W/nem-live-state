@@ -199,6 +199,85 @@ function parseCSV(text){
   return rows;
 }
 
+function csvObjects(text){
+  const rows=parseCSV(text.trim());
+  if(!rows.length) return [];
+  const cols=rows[0];
+  return rows.slice(1).filter(r=>r.length>1).map(r=>{
+    const o={}; cols.forEach((c,i)=>o[c]=r[i]); return o;
+  });
+}
+
+/* The forecast archive grows by roughly a megabyte a day and is appended in
+   chronological order, so pull the header and then only the tail. GitHub Pages
+   answers Range requests, so this works on the deployed site and not just
+   locally. */
+async function tailCSV(url,bytes=700000){
+  const head=await fetch(url,{headers:{Range:"bytes=0-2047"}});
+  if(!head.ok && head.status!==206) throw new Error("HTTP "+head.status);
+  const headerLine=(await head.text()).split("\n",1)[0].trim();
+  const total=+((head.headers.get("content-range")||"").split("/")[1]||0);
+  if(!total || total<=bytes) return csvObjects(await (await fetch(url)).text());
+  const r=await fetch(url,{headers:{Range:`bytes=${total-bytes}-${total-1}`}});
+  const tail=await r.text();
+  return csvObjects(headerLine+"\n"+tail.slice(tail.indexOf("\n")+1));
+}
+
+/* ===================== forecast skill analytics ===================== */
+const MIN=60000;
+const BUCKETS=[[0,30,"0–30m"],[30,60,"30–60m"],[60,120,"1–2h"],[120,240,"2–4h"],
+  [240,480,"4–8h"],[480,720,"8–12h"],[720,1440,"12–24h"],[1440,Infinity,"24h+"]];
+const bucketOf=m=>(BUCKETS.find(b=>m>=b[0]&&m<b[1])||BUCKETS[BUCKETS.length-1])[2];
+
+/* A pre-dispatch target is the 30-minute TRADING interval ending at that stamp,
+   and its real price is the mean of the six 5-minute prices inside it. Scoring
+   against the single instantaneous price measures a different quantity. */
+function truthAt(idx,region,t,minParts=4){
+  let sum=0,n=0;
+  for(let k=5;k>=0;k--){
+    const v=idx.get(region+"|"+(t-k*5*MIN));
+    if(v!=null){ sum+=v; n++; }
+  }
+  if(n===6) return {price:sum/n,mode:"full"};
+  if(n>=minParts) return {price:sum/n,mode:"partial"};
+  const inst=idx.get(region+"|"+t);
+  return inst!=null?{price:inst,mode:"instant"}:null;
+}
+
+function buildPairs(forecasts,actualRows){
+  const idx=new Map();
+  for(const r of actualRows){
+    const v=parseFloat(r.RRP!=null?r.RRP:r.PRICE);
+    if(!isNaN(v)) idx.set(r.REGIONID+"|"+nemParse(r.SETTLEMENTDATE),v);
+  }
+  const pairs=[];
+  for(const f of forecasts){
+    const p=parseFloat(f.RRP); if(isNaN(p)) continue;
+    const t=nemParse(f.SETTLEMENTDATE), iss=nemParse(f.issue);
+    const mins=(t-iss)/MIN;
+    if(!isFinite(mins)||mins<0) continue;
+    const tr=truthAt(idx,f.REGIONID,t); if(!tr) continue;
+    const persist=idx.get(f.REGIONID+"|"+iss);
+    pairs.push({region:f.REGIONID,issue:iss,target:t,mins,
+      fcast:p,actual:tr.price,mode:tr.mode,err:p-tr.price,abs:Math.abs(p-tr.price),
+      persistAbs:persist==null?null:Math.abs(persist-tr.price)});
+  }
+  return pairs;
+}
+
+function aggregate(rows){
+  if(!rows.length) return null;
+  const abs=rows.map(r=>r.abs).sort((a,b)=>a-b);
+  const mean=abs.reduce((s,v)=>s+v,0)/abs.length;
+  const pa=rows.filter(r=>r.persistAbs!=null).map(r=>r.persistAbs);
+  const pmae=pa.length?pa.reduce((s,v)=>s+v,0)/pa.length:null;
+  return {n:rows.length,mae:mean,
+    med:abs[Math.floor(abs.length/2)],
+    bias:rows.reduce((s,r)=>s+r.err,0)/rows.length,
+    persistMae:pmae, skill:pmae?1-mean/pmae:null,
+    thin:rows.length<30};
+}
+
 /* ===================== prefs + routing ===================== */
 const PREFS_KEY = "nemlive.prefs";
 const prefs = Object.assign({tab:"now",region:"SA1",auto:false,theme:"auto",fullRange:false},
@@ -397,6 +476,36 @@ function headroomChart(el,W,model){
     s+=`<text x="${W-p.r}" y="${y+h+14}" text-anchor="end" font-size="9.5" fill="var(--axis)">${fmt(hi)} MW</text>`;
     s+=`<text x="${W-p.r}" y="${y+h-2}" text-anchor="end" font-size="10.5" font-weight="700" fill="${tight?"var(--coral)":"var(--muted)"}">${fmt(r.value)} MW${tight?" ⚠":""}</text>`;
   });
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${s}</svg>`;
+}
+
+/* Forecast against outcome, with a 45-degree line. Points above the line are
+   intervals AEMO over-forecast, below are under-forecast. */
+function scatterChart(el,W,model){
+  const {points,scale,unit}=model;
+  const H=Math.round(Math.min(400,Math.max(240,W*0.72)));
+  const vals=points.flatMap(p=>[p.x,p.y]).filter(v=>v!=null&&!isNaN(v));
+  if(!vals.length){ el.innerHTML=`<p class="hint">No data.</p>`; return; }
+  let lo=Math.min(...vals), hi=Math.max(...vals);
+  const pad=(hi-lo)*0.08||1; lo-=pad; hi+=pad;
+  const p=plotBox(W,H);
+  const f0=scale.fwd(lo), f1=scale.fwd(hi);
+  const X=v=>p.l+(scale.fwd(v)-f0)/((f1-f0)||1)*p.pw;
+  const Y=v=>p.t+p.ph-(scale.fwd(v)-f0)/((f1-f0)||1)*p.ph;
+  const ax=yAxisSVG(scale,lo,hi,W,H,0,unit||"");
+  let s=ax.svg;
+  s+=`<line x1="${X(lo).toFixed(1)}" y1="${Y(lo).toFixed(1)}" x2="${X(hi).toFixed(1)}" y2="${Y(hi).toFixed(1)}" stroke="var(--zero)" stroke-width="1.3" stroke-dasharray="4 4"/>`;
+  for(const pt of points){
+    if(pt.x==null||pt.y==null||isNaN(pt.x)||isNaN(pt.y)) continue;
+    s+=`<circle cx="${X(pt.x).toFixed(1)}" cy="${Y(pt.y).toFixed(1)}" r="2.6" fill="${pt.color||"var(--blue)"}" opacity="0.5">`
+     + `<title>forecast $${fmt(pt.y,2)} vs actual $${fmt(pt.x,2)}</title></circle>`;
+  }
+  const ticks=scale.kind==="symlog"?symlogTicks(scale,lo,hi):niceTicks(lo,hi,5);
+  for(const v of ticks){
+    const x=X(v); if(!isFinite(x)) continue;
+    s+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="var(--axis)">${esc(fmt(v,0))}</text>`;
+  }
+  s+=`<text x="${p.l+p.pw/2}" y="${H-0.5}" text-anchor="middle" font-size="10" fill="var(--muted)">actual →</text>`;
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img">${s}</svg>`;
 }
 
@@ -605,6 +714,132 @@ forecast:{
     </div>`;
 
     return about+bar+kpis+chartsHTML+rawBlock("Raw JSON (first 200 rows)",rows.slice(0,200));
+  },
+  after(){
+    document.querySelectorAll("[data-region]").forEach(b=>b.onclick=()=>{
+      prefs.region=b.dataset.region; savePrefs(); rerender();
+    });
+  }
+},
+
+/* ---------- FORECAST SKILL ---------- */
+skill:{
+  tab:"Skill", sub:"predicted vs actual",
+  async load(){
+    // Served from this repo, so same-origin on Pages and on a local server.
+    // Opening the file straight from disk cannot read them (opaque origin).
+    const [fc,act,dis]=await Promise.all([
+      tailCSV("data/nem_predispatch_forecast.csv",900000),
+      tailCSV("data/nem_actual_5min.csv",400000),
+      tailCSV("data/nem_dispatch.csv",200000).catch(()=>[]),
+    ]);
+    return buildPairs(fc,[...act,...dis]);
+  },
+  render(pairs){
+    const about=aboutBlock({
+      title:"How good is AEMO's own forecast?",
+      what:"Every pre-dispatch forecast this project has archived, joined to what actually "
+        +"happened in that interval. The forecast is tagged with the moment it was issued, so "
+        +"the lead time is known exactly and nothing is scored with hindsight.",
+      why:"This is the number the whole project rests on. 'We beat AEMO' means nothing until "
+        +"AEMO's error is measured, at a named horizon, against a named baseline. The baseline "
+        +"here is persistence — assuming the price simply does not change — because absolute "
+        +"error on its own only tells you whether the market was calm.",
+      method:"GET", url:"data/nem_predispatch_forecast.csv  +  data/nem_actual_5min.csv  (Range-fetched tail)",
+      chips:[["ok","from this repo"],["","archived vintages"],["warn","short window — no spike yet"]],
+      fields:[
+        ["issue","When AEMO made the forecast. Lead time = target − issue."],
+        ["truth","Mean of the six 5-min prices in the 30-min trading interval, not the instant."],
+        ["skill","1 − MAE÷MAE(persistence). Below zero is worse than assuming no change."],
+        ["bias","Mean signed error. Positive means AEMO forecast higher than reality."],
+      ]});
+
+    if(!pairs.length){
+      return about+`<div class="msg info"><strong>No scored pairs yet.</strong><br>
+        This view reads the CSV archive from the site itself, so it needs the page served over
+        http. Opening <code>index.html</code> straight from disk blocks those reads.
+        Run <code>node serve.js</code>, or use the hosted site.</div>`;
+    }
+
+    const reg=prefs.region;
+    const mine=pairs.filter(p=>p.region===reg);
+    const all=aggregate(pairs), here=aggregate(mine);
+    const modeFull=pairs.filter(p=>p.mode==="full").length;
+
+    const bar=`<div class="regionbar">${REGIONS.map(r=>
+      `<button data-region="${r}" class="${r===reg?"on":""}">${r}</button>`).join("")}</div>`;
+
+    const kpis=`<div class="kpis">
+      ${kpi("Scored pairs",fmt(pairs.length),modeFull+" on a full 30-min average")}
+      ${kpi("Region",esc(reg),fmt(mine.length)+" pairs")}
+      ${kpi("AEMO mean error","$"+fmt(here?here.mae:null,1),"absolute, all horizons")}
+      ${kpi("Persistence","$"+fmt(here&&here.persistMae,1),"assume no change")}
+      ${kpi("Skill",here&&here.skill!=null?here.skill.toFixed(2):"–",
+        here&&here.skill<0?"worse than persistence":"beats persistence",
+        here&&here.skill<0?"alert":"")}
+      ${kpi("Bias","$"+fmt(here?here.bias:null,1),here&&here.bias>0?"forecasts too high":"forecasts too low")}
+    </div>`;
+
+    // headline: what was forecast for each interval vs what happened
+    const H_TARGET=120;   // pick the vintage closest to 2 h ahead for each target
+    const byTarget=new Map();
+    for(const p of mine){
+      const cur=byTarget.get(p.target);
+      if(!cur||Math.abs(p.mins-H_TARGET)<Math.abs(cur.mins-H_TARGET)) byTarget.set(p.target,p);
+    }
+    const seq=[...byTarget.values()].sort((a,b)=>a.target-b.target);
+    const gapSeries=[
+      {name:"Actual",color:"var(--ink-strong)",points:seq.map(p=>({x:p.target,y:p.actual}))},
+      {name:"Forecast ~2 h ahead",color:REGION_COLORS[reg],points:seq.map(p=>({x:p.target,y:p.fcast}))},
+    ];
+
+    const buckets=BUCKETS.map(b=>b[2]).map(name=>({name,a:aggregate(mine.filter(p=>bucketOf(p.mins)===name))}))
+      .filter(b=>b.a);
+    const maeRows=buckets.map(b=>({label:b.name,value:b.a.mae,color:REGION_COLORS[reg]}));
+    const persistRows=buckets.map(b=>({label:b.name,value:b.a.persistMae,color:"var(--muted)"}));
+    const skillRows=buckets.map(b=>({label:b.name,value:b.a.skill,
+      color:b.a.skill<0?"var(--coral)":"var(--green)"}));
+
+    const legend=`<div class="legend">${gapSeries.map(s=>
+      `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join("")}</div>`;
+
+    const chartsHTML=`<div class="charts">
+      ${chartBox("The gap: forecast vs what happened",
+        "For every settled interval, the archived forecast made about two hours earlier, against the "
+        +"price that actually cleared. Where the lines separate, AEMO was wrong — and by how much.",
+        timeChart,{series:gapSeries,scale:symlog({linthresh:100}),unit:"",fmtD:0,
+          bands:[{from:-1000,to:0,fill:"var(--neg-band)"},{from:300,to:23200,fill:"var(--spike-band)"}]},true)}
+      ${chartBox("Error by lead time","Mean absolute error, "+esc(reg)+". Longer lead, larger error — "
+        +"if this were flat the join would be wrong.",
+        barChart,{rows:maeRows,unit:" $/MWh",fmtD:1})}
+      ${chartBox("Persistence, same lead times","What you get by assuming the price simply does not change.",
+        barChart,{rows:persistRows,unit:" $/MWh",fmtD:1})}
+      ${chartBox("Skill against persistence",
+        "Above zero AEMO beats the trivial baseline; below zero it loses to it. Short horizons "
+        +"flatter persistence, because it is measured seconds from the target.",
+        barChart,{rows:skillRows,unit:"",fmtD:2,diverging:true},true)}
+      ${chartBox("Forecast against outcome",
+        "Dashed line is a perfect forecast. Above it AEMO forecast too high, below it too low.",
+        scatterChart,{points:mine.map(p=>({x:p.actual,y:p.fcast,color:REGION_COLORS[reg]})),
+          scale:symlog({linthresh:100})},true)}
+    </div>`;
+
+    const table=tableFor(buckets,[
+      ["Lead time",b=>esc(b.name)],["n",b=>fmt(b.a.n)],
+      ["AEMO mean AE",b=>"$"+fmt(b.a.mae,1)],["median AE",b=>"$"+fmt(b.a.med,1)],
+      ["Persistence",b=>"$"+fmt(b.a.persistMae,1)],
+      ["Skill",b=>`<span style="color:${b.a.skill<0?"var(--coral)":"var(--green)"};font-weight:700">${b.a.skill==null?"–":b.a.skill.toFixed(2)}</span>`],
+      ["Bias",b=>"$"+fmt(b.a.bias,1)],
+    ]);
+
+    return about+bar+kpis+legend+chartsHTML
+      +`<details class="raw" open><summary>By lead time — ${esc(reg)}</summary>${table}</details>`
+      +`<div class="note-strong">Read this with the window in mind. The archive is a few days old and
+        contains <strong>no price spike</strong>. In Q1 2026, 28 intervals out of 25,920 produced
+        roughly 29% of South Australia's quarterly average price — a short window has almost no chance
+        of catching one, so these numbers describe the calm middle of the distribution and say nothing
+        yet about the part that carries the money. Backfilling AEMO's MMSDM archive (free, back to
+        2009) is what fixes that.</div>`;
   },
   after(){
     document.querySelectorAll("[data-region]").forEach(b=>b.onclick=()=>{
