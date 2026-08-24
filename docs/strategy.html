@@ -1,0 +1,859 @@
+<title>Scarcity Signal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#f7f9fb;
+  --raised:#ffffff;
+  --sunken:#eef2f7;
+  --ink:#17202c;
+  --ink-2:#3d4a5c;
+  --ink-3:#6b7a8d;
+  --rule:#dbe3ec;
+  --rule-2:#c3cfdc;
+  --amber:#b5761c;
+  --amber-bg:#fdf3e2;
+  --teal:#2b7686;
+  --teal-bg:#e6f2f4;
+  --coral:#b8453093;
+  --coral-ink:#a8412c;
+  --coral-bg:#fceeea;
+  --green:#3a7d63;
+  --green-bg:#e8f4ee;
+  --shadow:0 1px 2px rgba(23,32,44,.04),0 8px 24px rgba(23,32,44,.06);
+  --measure:68ch;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0d1219;
+  --raised:#141c26;
+  --sunken:#0a0f15;
+  --ink:#e6ecf3;
+  --ink-2:#b3c0cf;
+  --ink-3:#7d8b9c;
+  --rule:#232f3d;
+  --rule-2:#33424f;
+  --amber:#e8a33d;
+  --amber-bg:#2a1e0c;
+  --teal:#57b3c4;
+  --teal-bg:#0d262b;
+  --coral:#d9614c93;
+  --coral-ink:#e8836f;
+  --coral-bg:#2b1410;
+  --green:#5cb08d;
+  --green-bg:#0e2620;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --ground:#0d1219;
+  --raised:#141c26;
+  --sunken:#0a0f15;
+  --ink:#e6ecf3;
+  --ink-2:#b3c0cf;
+  --ink-3:#7d8b9c;
+  --rule:#232f3d;
+  --rule-2:#33424f;
+  --amber:#e8a33d;
+  --amber-bg:#2a1e0c;
+  --teal:#57b3c4;
+  --teal-bg:#0d262b;
+  --coral:#d9614c93;
+  --coral-ink:#e8836f;
+  --coral-bg:#2b1410;
+  --green:#5cb08d;
+  --green-bg:#0e2620;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+.col{max-width:var(--measure);}
+
+/* ---------- masthead ---------- */
+.mast{padding:76px 0 40px;border-bottom:1px solid var(--rule);}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
+}
+h1{
+  font-family:Newsreader,Georgia,serif;font-weight:500;
+  font-size:clamp(40px,6.2vw,68px);line-height:1.02;letter-spacing:-.022em;
+  margin:20px 0 0;text-wrap:balance;max-width:16ch;
+}
+h1 em{font-style:italic;color:var(--amber);}
+.standfirst{
+  font-family:Newsreader,Georgia,serif;font-size:clamp(18px,2.2vw,22px);
+  line-height:1.5;color:var(--ink-2);margin:24px 0 0;max-width:56ch;
+}
+.mastmeta{
+  display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:34px;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);
+}
+.mastmeta b{color:var(--ink-2);font-weight:500;}
+
+/* ---------- layout ---------- */
+.body{display:grid;grid-template-columns:1fr;gap:0;padding:0 0 90px;}
+@media(min-width:1040px){
+  .body{grid-template-columns:200px 1fr;gap:56px;}
+  nav.toc{
+    position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+    padding:56px 0 40px;
+  }
+}
+nav.toc{padding:36px 0 0;}
+nav.toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;}
+nav.toc a{
+  display:block;padding:5px 0;font-size:13.5px;line-height:1.35;
+  color:var(--ink-3);text-decoration:none;border-left:2px solid transparent;padding-left:12px;
+  transition:color .15s,border-color .15s;
+}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--ink);border-left-color:var(--amber);}
+nav.toc .tocnum{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--rule-2);
+  margin-right:7px;
+}
+
+/* ---------- sections ---------- */
+section{padding:56px 0 0;scroll-margin-top:20px;}
+h2{
+  font-family:Newsreader,Georgia,serif;font-weight:500;
+  font-size:clamp(27px,3.6vw,38px);line-height:1.12;letter-spacing:-.018em;
+  margin:0 0 6px;text-wrap:balance;max-width:22ch;
+}
+h2 .num{
+  display:block;font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--amber);
+  margin-bottom:14px;
+}
+h3{
+  font-family:"IBM Plex Sans",sans-serif;font-weight:600;font-size:17.5px;
+  letter-spacing:-.005em;margin:38px 0 8px;color:var(--ink);
+}
+h4{
+  font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:11.5px;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+  margin:30px 0 8px;
+}
+p{margin:0 0 15px;max-width:var(--measure);}
+.lead{font-size:18px;color:var(--ink-2);max-width:60ch;}
+ul,ol{max-width:var(--measure);padding-left:20px;margin:0 0 15px;}
+li{margin-bottom:7px;}
+li::marker{color:var(--ink-3);}
+strong{font-weight:600;}
+em{font-style:italic;}
+a{color:var(--teal);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px;}
+a:hover{color:var(--ink);}
+code{
+  font-family:"IBM Plex Mono",monospace;font-size:.855em;
+  background:var(--sunken);padding:1.5px 5px;border-radius:3px;color:var(--ink-2);
+}
+hr{border:none;border-top:1px solid var(--rule);margin:52px 0 0;}
+
+/* ---------- data ---------- */
+.scroll{overflow-x:auto;margin:22px 0 24px;}
+table{
+  border-collapse:collapse;width:100%;min-width:520px;
+  font-size:14.5px;font-variant-numeric:tabular-nums;
+}
+caption{
+  caption-side:bottom;text-align:left;font-size:13px;color:var(--ink-3);
+  padding-top:12px;line-height:1.5;
+}
+th,td{padding:9px 14px 9px 0;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top;}
+thead th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1px solid var(--rule-2);padding-bottom:8px;
+}
+tbody tr:last-child td{border-bottom:none;}
+td.n,th.n{text-align:right;padding-right:20px;font-variant-numeric:tabular-nums;}
+.pos{color:var(--green);font-weight:500;}
+.neg{color:var(--coral-ink);font-weight:600;}
+
+/* full-bleed metric strip */
+.metrics{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);
+  margin:30px 0;border-radius:2px;overflow:hidden;
+}
+.metric{background:var(--raised);padding:19px 20px 17px;}
+.metric .v{
+  font-family:Newsreader,Georgia,serif;font-size:33px;line-height:1;
+  letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums;
+}
+.metric .v.hot{color:var(--amber);}
+.metric .k{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-top:9px;
+}
+.metric .s{font-size:13px;color:var(--ink-2);margin-top:5px;line-height:1.42;}
+
+/* ---------- correction block ----------
+   Its own treatment because it encodes a real content type: a place where
+   the evidence overturned an assumption the founding report was built on. */
+.correction{
+  border-left:3px solid var(--coral);background:var(--coral-bg);
+  padding:20px 24px;margin:28px 0;border-radius:0 3px 3px 0;max-width:var(--measure);
+}
+.correction .tag{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--coral-ink);
+  display:block;margin-bottom:9px;
+}
+.correction p:last-child{margin-bottom:0;}
+.correction .was{
+  font-size:14.5px;color:var(--ink-2);padding-bottom:10px;margin-bottom:11px;
+  border-bottom:1px solid var(--coral);
+}
+
+.note{
+  border-left:3px solid var(--rule-2);padding:4px 0 4px 20px;margin:24px 0;
+  color:var(--ink-2);max-width:var(--measure);
+}
+.note p:last-child{margin-bottom:0;}
+
+.built{
+  border:1px solid var(--rule);background:var(--raised);border-radius:3px;
+  padding:22px 24px;margin:26px 0;box-shadow:var(--shadow);max-width:var(--measure);
+}
+.built .tag{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:500;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--green);
+  display:block;margin-bottom:11px;
+}
+.built p:last-child,.built ul:last-child{margin-bottom:0;}
+
+/* chips */
+.chip{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;
+  font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+  padding:2.5px 8px;border-radius:2px;white-space:nowrap;
+}
+.chip.ok{background:var(--green-bg);color:var(--green);}
+.chip.warn{background:var(--amber-bg);color:var(--amber);}
+.chip.no{background:var(--coral-bg);color:var(--coral-ink);}
+.chip.info{background:var(--teal-bg);color:var(--teal);}
+
+/* pull quote */
+.pull{
+  font-family:Newsreader,Georgia,serif;font-size:clamp(21px,2.7vw,27px);
+  line-height:1.35;letter-spacing:-.012em;color:var(--ink);
+  border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);
+  padding:26px 0;margin:38px 0;max-width:34ch;text-wrap:balance;
+}
+.pull .attr{
+  display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:16px;
+}
+
+/* layered stack diagram */
+.stack{margin:30px 0;max-width:var(--measure);}
+.layer{
+  display:grid;grid-template-columns:104px 1fr;gap:18px;align-items:baseline;
+  padding:13px 0;border-bottom:1px solid var(--rule);
+}
+.layer:last-child{border-bottom:none;}
+.layer .lbl{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);padding-top:3px;
+}
+.layer .what{font-weight:600;font-size:15.5px;}
+.layer .desc{font-size:14.5px;color:var(--ink-2);margin-top:3px;line-height:1.5;}
+.layer.chaotic .lbl{color:var(--amber);}
+.layer.chaotic .what{color:var(--amber);}
+
+footer{
+  border-top:1px solid var(--rule);padding:34px 0 70px;
+  font-size:13.5px;color:var(--ink-3);
+}
+footer p{max-width:var(--measure);}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <span class="eyebrow">Founding brief · 24 August 2026</span>
+  <h1>Price is a <em>scarcity signal</em>, not a physical quantity</h1>
+  <p class="standfirst">What the AEMO feeds actually expose, why Australian electricity
+    forecasting is genuinely hard, and whether "world models × LLMs × chaotic systems"
+    is a real thesis or a buzzword collision.</p>
+  <div class="mastmeta">
+    <span><b>Repo</b> Tharindi-W/nem-live-state (private)</span>
+    <span><b>Status</b> dashboard live, collector on GitHub Actions</span>
+    <span><b>Baseline</b> measured, not assumed</span>
+  </div>
+</header>
+
+<div class="body">
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#feeds"><span class="tocnum">01</span>What the feeds expose</a></li>
+    <li><a href="#hard"><span class="tocnum">02</span>Why it's hard here</a></li>
+    <li><a href="#chaos"><span class="tocnum">03</span>Is it chaotic?</a></li>
+    <li><a href="#ai"><span class="tocnum">04</span>Where AI fits</a></li>
+    <li><a href="#moat"><span class="tocnum">05</span>The moat question</a></li>
+    <li><a href="#startup"><span class="tocnum">06</span>Is it a business?</a></li>
+    <li><a href="#next"><span class="tocnum">07</span>What to do next</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="feeds">
+<h2><span class="num">01</span>What the feeds actually expose</h2>
+
+<p class="lead">You were using three feeds and reading maybe half of what they return.
+The dashboard now reads the rest, and the collector archives four more.</p>
+
+<p>The dispatch summary was the biggest surprise. It was being parsed for price and
+demand while three fields sat untouched in every response:</p>
+
+<ul>
+  <li><code>PRICE_STATUS</code>, <code>APCFLAG</code>, <code>MARKETSUSPENDEDFLAG</code> — the
+    regime markers. They are constant almost always, which is exactly why they matter:
+    they flag the rare intervals where the market stops pricing freely, and those are
+    the intervals a forecast has to survive.</li>
+  <li><code>INTERCONNECTORFLOWS</code> — a nested JSON string carrying, for each of the six
+    links, the flow <em>and both directional limits</em>. Flow against limit is
+    constraint-binding proximity. That is the network state regional price separation
+    depends on, and it was being discarded every five minutes.</li>
+</ul>
+
+<p>The pre-dispatch feed hid something better. Every call returns a full trailing
+<em>day</em> of five-minute actuals — 5 regions × 288 intervals — and the collector was
+using them only to derive a timestamp before throwing them away. Archiving them lifted
+the forecast-to-actual match rate from roughly 10% to near complete.</p>
+
+<div class="metrics">
+  <div class="metric"><div class="v">1,440</div><div class="k">rows recovered</div>
+    <div class="s">Per call, previously discarded</div></div>
+  <div class="metric"><div class="v">6</div><div class="k">interconnectors</div>
+    <div class="s">Now archived with both limits</div></div>
+  <div class="metric"><div class="v">2</div><div class="k">rooftop streams</div>
+    <div class="s">Satellite estimate and measurement</div></div>
+  <div class="metric"><div class="v hot">26 GW</div><div class="k">invisible</div>
+    <div class="s">Rooftop PV excluded from demand</div></div>
+</div>
+
+<h3>Rooftop solar is the one nobody meters</h3>
+
+<p>Behind-the-meter solar does not appear in <code>TOTALDEMAND</code> — that field is
+<em>operational</em> demand, and Australia has the highest per-capita rooftop PV on earth
+at roughly 26 GW inside the NEM. AEMO cannot measure it; it is estimated from satellite
+imagery plus a sampled subset of monitored sites.</p>
+
+<p>Which means AEMO publishes <strong>two independent actuals streams for the same
+interval</strong>: a <code>SATELLITE</code> estimate and a <code>MEASUREMENT</code> series.
+The gap between them is a free, self-labelling estimate-versus-truth pair. First reading
+from the archive, at the morning ramp:</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Interval</th><th>Region</th><th class="n">Satellite</th>
+    <th class="n">Measured</th><th class="n">Divergence</th></tr></thead>
+  <tbody>
+    <tr><td>07:00</td><td>NSW1</td><td class="n">321.1 MW</td><td class="n">113.5 MW</td>
+      <td class="n neg">+207.6 MW</td></tr>
+    <tr><td>07:00</td><td>QLD1</td><td class="n">369.4 MW</td><td class="n">168.5 MW</td>
+      <td class="n neg">+200.9 MW</td></tr>
+  </tbody>
+  <caption>Mean absolute gap 95.2 MW across 30 paired observations. These are sunrise
+    intervals where absolute values are small, and <code>MEASUREMENT</code> is itself a
+    scaled sample rather than ground truth — but a ~200 MW divergence during the morning
+    ramp is material, and the morning ramp is when demand forecasting is hardest.</caption>
+</table>
+</div>
+
+<h3>The full register</h3>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Source</th><th>Reached via</th><th>Signal</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>NEM dispatch summary</td><td>Browser</td><td>Price, demand, network state</td>
+      <td><span class="chip ok">wired</span></td></tr>
+    <tr><td>NEM pre-dispatch</td><td>Browser</td><td>The baseline to beat</td>
+      <td><span class="chip ok">wired</span></td></tr>
+    <tr><td>WEM clearing prices</td><td>Browser</td><td>Transfer test</td>
+      <td><span class="chip ok">wired</span></td></tr>
+    <tr><td>Weather — ECMWF</td><td>Browser</td><td>The dominant exogenous driver</td>
+      <td><span class="chip ok">wired</span></td></tr>
+    <tr><td>Rooftop PV actual ×2</td><td>Collector</td><td>Demand-error label</td>
+      <td><span class="chip ok">wired</span></td></tr>
+    <tr><td>Rooftop PV forecast</td><td>Collector</td><td>POE bands, vintaged</td>
+      <td><span class="chip ok">wired</span></td></tr>
+    <tr><td>Market notices</td><td>Collector</td><td>~145k natural-language events</td>
+      <td><span class="chip warn">next</span></td></tr>
+    <tr><td>Bid stacks + rebid reasons</td><td>Collector</td><td>Stated participant intent</td>
+      <td><span class="chip warn">next</span></td></tr>
+    <tr><td>MMSDM archive, 2009→</td><td>Batch</td><td>Seventeen years, free</td>
+      <td><span class="chip warn">next</span></td></tr>
+    <tr><td>Gas Bulletin Board</td><td>Collector</td><td>Peaker marginal cost</td>
+      <td><span class="chip info">later</span></td></tr>
+    <tr><td>Bureau of Meteorology</td><td>—</td><td>Radar, observations</td>
+      <td><span class="chip no">licence</span></td></tr>
+    <tr><td>APVI rooftop PV</td><td>—</td><td>Independent PV cross-check</td>
+      <td><span class="chip no">token</span></td></tr>
+  </tbody>
+  <caption>"Browser" means the host sends <code>Access-Control-Allow-Origin: *</code> and the
+    page fetches it directly with no backend. NEMWeb sends no CORS header at all, so
+    everything there goes through the collector.</caption>
+</table>
+</div>
+
+<div class="correction">
+  <span class="tag">Licensing trap</span>
+  <p class="was">The report treats Bureau of Meteorology feeds as a free data source and
+    ranks weather as the second-best domain to build on.</p>
+  <p>BoM products are free to <em>access</em> but explicitly <strong>not licensed for
+    commercial use</strong>. Commercial use requires a paid data licence. Open-Meteo's
+    convenient <code>bom_access_global</code> endpoint redistributes exactly that data —
+    so the dashboard pins <code>ecmwf_ifs025</code> instead. Resolve this before you charge
+    anyone anything.</p>
+</div>
+
+</section>
+
+<hr>
+
+<section id="hard">
+<h2><span class="num">02</span>Why forecasting is hard here specifically</h2>
+
+<p class="lead">Not "electricity is volatile." Four structural facts about this market
+that make it a different problem from forecasting demand.</p>
+
+<h3>The price is a dual variable</h3>
+
+<p>Demand is a physical quantity with continuous dynamics and bounded derivatives — you
+can forecast it to a couple of percent. Price is the shadow price of the regional energy
+balance constraint in a constrained optimisation. It has no inertia, no conservation law,
+no smoothness. It can move from −$50 to the cap in three hundred seconds without any
+physical variable moving more than a few percent, because a constraint bound.</p>
+
+<p>Forecasting demand and forecasting price are not the same discipline. Most teams that
+fail here fail because they treat them as one.</p>
+
+<h3>The dynamic range is 24,200 to one</h3>
+
+<p>The floor is −$1,000/MWh and the market price cap is $23,200/MWh for FY2026-27. That
+span reprices 288 times a day. Negative prices are not an anomaly — in Q1 2026 they were
+<strong>31% of all South Australian intervals</strong> and around two-thirds of SA daytime
+intervals. Any chart with a linear price axis is lying, which is why the dashboard uses a
+symlog scale throughout.</p>
+
+<h3>The tail is the market</h3>
+
+<div class="pull">
+  Twenty-eight intervals out of 25,920 — one tenth of one percent — produced roughly 29%
+  of South Australia's quarterly average price.
+  <span class="attr">AEMO Quarterly Energy Dynamics, Q1 2026</span>
+</div>
+
+<p>In that quarter SA averaged $88/MWh, of which $38 — 43% — came from intervals above
+$300. A single day, 26 January, contributed about 29% of the whole quarter. This is why
+point forecasts are close to worthless: a model trained on absolute error produces
+conditional-median forecasts, and the conditional median essentially never spikes. It is
+mathematically incapable of predicting the events that generate the returns.</p>
+
+<h3>The generating process changed last year</h3>
+
+<p>Between Q1 2025 and Q1 2026 the NEM added 4,445 MW / 11,219 MWh of grid-scale battery,
+more than doubling installed capacity. Batteries now set the price in <strong>32–36% of
+dispatch intervals</strong>, up from about 17%, displacing hydro as the most frequent
+price-setting technology.</p>
+
+<p>That is not a change in the level of prices. It is a change in the mechanism. And it
+brings a hidden state variable with it: battery state of charge determines how long a
+spike lasts, because discharge sets price until SOC depletes and then hands off to gas.
+A model without SOC cannot get spike <em>duration</em> right — and duration is exactly what
+determines a battery's revenue.</p>
+
+<p>A second, sharper example of regime change: in Q1 2025, 12% of negative prices sat in
+the −$10 to $0 band. In Q1 2026 that was 68%. The cause was not physics — large-scale
+generation certificate prices collapsed from $29 to $5, changing every renewable
+generator's economic floor bid. No amount of architecture catches that. Only an exogenous
+feature does.</p>
+
+</section>
+
+<hr>
+
+<section id="chaos">
+<h2><span class="num">03</span>Is this a chaotic system?</h2>
+
+<p class="lead">Asked rigorously, the answer is no — and the reason is more useful than
+the label would have been.</p>
+
+<p>There is a real literature here, and its most instructive feature is that it corrected
+itself. A 2016 paper found positive maximal Lyapunov exponents across energy commodity
+series and concluded they were deterministic rather than stochastic. In 2022 <em>the same
+authors</em> re-ran it with noise-level estimation and found negative exponents for most
+series and noise levels of 40–58% — meaning the "attractor" was mostly noise ball. A study
+of Greek and Italian electricity prices using the noise-robust Jacobian method found
+λ<sub>max</sub> negative throughout: nonlinear dependence, yes; chaos, no.</p>
+
+<p>The useful move is to stop asking about the system as a whole and separate the layers,
+because they have different answers:</p>
+
+<div class="stack">
+  <div class="layer chaotic">
+    <div class="lbl">Layer 1</div>
+    <div><div class="what">Weather — genuinely chaotic</div>
+      <div class="desc">The canonical Lorenz system. Synoptic error-doubling time of
+        1.5–2 days, practical limit around two weeks; mesoscale convection predictable
+        only hours ahead. This is the only layer where "Lyapunov time" means anything,
+        and it dominates all exogenous uncertainty beyond about an hour.</div></div>
+  </div>
+  <div class="layer">
+    <div class="lbl">Layer 2</div>
+    <div><div class="what">Physical grid — engineered away from chaos</div>
+      <div class="desc">A stiff nonlinear system with genuine bifurcation structure, but
+        it is not operated there. Frequency control, protection and security constraints
+        exist precisely to suppress positive exponents. When it fails, the failure mode
+        is cascading — combinatorial, not chaotic.</div></div>
+  </div>
+  <div class="layer">
+    <div class="lbl">Layer 3</div>
+    <div><div class="what">The dispatch engine — deterministic and memoryless</div>
+      <div class="desc">Every five minutes NEMDE solves a security-constrained economic
+        dispatch. Given the inputs, the output is a deterministic function. It has no
+        state and no trajectory. Price jumps are the discontinuity of an argmin, not
+        exponential divergence — structural instability at a fold, and locally
+        completely predictable if you know the bid stack.</div></div>
+  </div>
+  <div class="layer">
+    <div class="lbl">Layer 4</div>
+    <div><div class="what">Strategic bidding — reflexive</div>
+      <div class="desc">Participants rebid against AEMO's published forecast, quoting it
+        verbatim in their stated reasons. Your forecast, adopted widely enough, changes
+        what it forecasts.</div></div>
+  </div>
+</div>
+
+<p>So the honest description: <strong>a regime-switching jump process, driven by a
+chaotically-forced exogenous input, filtered through a deterministic discontinuous
+optimisation operator, with an adaptive strategic layer on top.</strong> Formally the
+closest standard object is a piecewise-deterministic Markov process whose "flow" is the
+solution map of a parametric optimisation.</p>
+
+<div class="correction">
+  <span class="tag">Positioning</span>
+  <p class="was">"We're applying AI to a chaotic system."</p>
+  <p>Do not say "chaotic" in front of a NEM trader. They will hear "we don't have a model,"
+    and on the technical merits they would be right. The accurate words are
+    <strong>discontinuous</strong> and <strong>regime-switching</strong> — and they happen
+    to describe something you can actually build against, which "chaotic" does not.</p>
+</div>
+
+<p>There is one genuinely important consequence. Because layer 3 is a deterministic
+optimisation, the correct architecture is <em>learn the inputs, compute the dispatch</em>.
+The constraint equations and bid stacks are public. Learning end-to-end what you could
+compute exactly throws away a free structural prior — and that is the most expensive
+mistake available to you.</p>
+
+</section>
+
+<hr>
+
+<section id="ai">
+<h2><span class="num">04</span>Where AI actually fits</h2>
+
+<h3>World models: right idea, wrong headline</h3>
+
+<p>A world model here would be a learned latent simulator of grid state — demand and its
+drivers, per-unit availability and battery SOC, the offer stack, the binding constraint
+set, the weather field — rollable forward and conditionable on interventions. There are
+four places it genuinely beats direct forecasting:</p>
+
+<ol>
+  <li><strong>Coherent joint scenarios.</strong> You cannot make a battery dispatch
+    decision from marginal quantiles. Optimal storage dispatch depends on the joint
+    distribution of the price <em>path</em>. A generative rollout gives you sample paths
+    with correct temporal dependence. This is the strongest honest argument.</li>
+  <li><strong>Counterfactuals.</strong> "What if this unit trips at 17:30 with SA already
+    at LOR1?" No direct forecaster answers that — the input distribution has no such
+    example. In February 2024 six transmission towers collapsed near Anakie and Loy Yang A
+    tripped simultaneously. You cannot predict that. You must be able to price it within
+    seconds of it happening.</li>
+  <li><strong>Constraint-aware rollouts</strong>, because the binding set is persistent and
+    driven by outages and topology.</li>
+  <li><strong>Sample-efficient RL for bidding</strong>, which needs a simulator to train in.</li>
+</ol>
+
+<p>And where it is overkill: short-horizon quantile forecasting, where gradient-boosted
+quantile regression on lagged prices plus AEMO's own forecast features will beat a latent
+world model and ship in a week.</p>
+
+<h3>The weather model is the real world model</h3>
+
+<p>Conditional on the bid stack (public, persistent), the network topology (published) and
+unit availability (published), nearly all remaining uncertainty at 1–48 hours is
+uncertainty about hub-height wind, irradiance and temperature. The grid layer above that
+is comparatively shallow and mostly known.</p>
+
+<p>There is a genuine "why now" in this. GenCast-class models produce probabilistic weather
+ensembles in minutes on a single accelerator, where traditional 50-member ensembles need
+HPC and hours. Tail-focused price forecasting <em>requires</em> large ensembles — you cannot
+estimate a 99th-percentile price from a deterministic weather run. That economics just
+flipped, and it has a date on it.</p>
+
+<div class="built">
+  <span class="tag">Built</span>
+  <p>The dashboard's weather panel samples ECMWF at wind-farm and solar-farm coordinates,
+    not city coordinates. Adelaide is 180 km from the Mid-North wind farms and often sits
+    in the opposite wind regime — plotting "Adelaide wind speed" next to "SA price" teaches
+    a relationship that isn't there. <code>wind_speed_100m</code> is the load-bearing
+    variable; <code>wind_speed_10m</code> is the decoy.</p>
+</div>
+
+<h3>LLMs: wrong for the headline job, right for one real job</h3>
+
+<p>As numeric forecasters, the evidence is bad. A NeurIPS 2024 paper ablated the leading
+LLM-based time-series forecasters and found that <em>removing the language model entirely,
+or replacing it with a single basic attention layer, did not degrade performance and
+usually improved it</em>. Add that an LLM forward pass per five-minute interval per region
+per quantile is economically absurd against a gradient-boosting inference measured in
+microseconds.</p>
+
+<p>But this market has an unusually rich natural-language surface that almost nobody mines:</p>
+
+<ul>
+  <li><strong>Market notices</strong> — around 145,000 of them, including price-affecting
+    interventions announced in prose minutes to hours before they bite. A direction issued
+    for voltage control in SA changes the conditional price distribution in a way no
+    numeric model sees until the dispatch outcome reveals it.</li>
+  <li><strong>Rebid explanations</strong> — participants are legally required to state why
+    they changed their offer, with event, awareness and decision timestamps. On a single
+    quiet Saturday: 1,154 rebids across 568 units, 2,096 carrying text. Order 10⁵–10⁶ per
+    year, back to 2009. These are timestamped statements of belief and intent, aligned to
+    the moment the offer stack moved. Nothing else gives you a "why" channel.</li>
+  <li><strong>Constraint equations</strong> — semi-formal language mapping to a machine-usable
+    graph of which constraints bind under which outage affecting which units.</li>
+</ul>
+
+<p>Be honest about the limits: the rebid field is short and formulaic by regulatory design.
+The value is in classification, linking and aggregation at scale, not literary
+comprehension — which is good news, because it means a small fine-tuned classifier plus an
+LLM for the hard 5% is the right engineering and the cost is trivial.</p>
+
+<div class="note">
+  <p><strong>One hard rule.</strong> Never let the LLM emit a number that reaches a customer.
+    It produces features, structure and prose. The forecast comes from the calibrated
+    statistical model.</p>
+</div>
+
+</section>
+
+<hr>
+
+<section id="moat">
+<h2><span class="num">05</span>The moat question</h2>
+
+<div class="correction">
+  <span class="tag">This one changes the plan</span>
+  <p class="was">The report's central operational instruction is "archive the live stream
+    from day one," on the reasoning that public sites keep only short rolling windows.
+    It is treated as the defensible asset.</p>
+  <p>AEMO's MMSDM archive publishes everything you are collecting — <strong>including the
+    vintaged P5MIN and pre-dispatch forecast solutions</strong>, rooftop PV actuals and
+    forecasts, bid stacks with rebid explanations, and dispatch constraints — back to
+    <strong>2009</strong>, free, in about 200 tables. Your careful vintage capture is
+    architecturally correct and also already done for you, for seventeen years.</p>
+</div>
+
+<p>So the archive is a <strong>latency</strong> advantage, not a <strong>history</strong>
+advantage. A competitor can have seventeen years by Friday. Worse, a three-day archive
+contains no spike event at all, so it can only measure the easy middle of the distribution
+and is structurally blind to where the money is. Backfilling MMSDM moves you from "wait two
+years for a tail event" to "train tomorrow."</p>
+
+<h4>Not a moat</h4>
+<ul>
+  <li>Fetching public APIs. All of it is free and broadly licensed.</li>
+  <li>A nice dashboard. WattSight already does live NEM price and weather for $149/month,
+    explicitly positioned against enterprise tools costing $5,000–15,000/year. ez2view has
+    had 23 years to build fifty-plus widgets.</li>
+  <li>A generic LLM wrapper. LLM-and-power-systems publications went from 1 in 2022 to 464
+    in 2025. Loud field, thin results.</li>
+</ul>
+
+<h4>Actually defensible</h4>
+<ol>
+  <li><strong>A public, continuously-updated forecast-skill scoreboard.</strong> Pinball loss
+    and CRPS against AEMO's own forecasts, per region, per horizon, per hour, updated daily.
+    Nobody in Australia publishes this. It is cheap to build, it forces every competitor to
+    answer "so what's <em>your</em> score?", and while AEMO's side can be backfilled by anyone,
+    <em>your own live track record cannot</em>.</li>
+  <li><strong>The natural-language corpus and extraction pipeline</strong>, typed and linked to
+    dispatch outcomes with a validated evaluation set. Free inputs; expensive, boring,
+    compounding asset.</li>
+  <li><strong>Latency and correctness engineering</strong> — price revisions, intervention
+    pricing, APC flags and suspension regimes. Most people get this wrong and quietly poison
+    their own backtests.</li>
+  <li><strong>An economic evaluation harness</strong> that scores forecasts by realised battery
+    P&amp;L, not MAE. Customers buy dollars.</li>
+</ol>
+
+</section>
+
+<hr>
+
+<section id="startup">
+<h2><span class="num">06</span>Is it a good startup idea?</h2>
+
+<p class="lead">The intersection as stated — world models × LLMs × chaotic systems — is a
+buzzword collision. There is a real thesis underneath it.</p>
+
+<p>Term by term: "chaotic" is technically wrong and commercially harmful. "World model" is
+substantively right but will be read as hype unless you say what you actually mean. "LLM"
+is right for one job and wrong for the headline job, and conflating the two is the fastest
+way to be dismissed by a technical buyer.</p>
+
+<div class="pull">
+  Probabilistic, weather-driven, constraint-aware scenario simulation of NEM dispatch —
+  with a language layer that turns AEMO's unstructured operational record into features
+  and explanations — scored publicly and continuously against AEMO's own forecasts.
+  <span class="attr">Every clause falsifiable</span>
+</div>
+
+<h3>The market, with the bad news included</h3>
+
+<p>The good news is real: 2025 saw 1.9 GW / 4.9 GWh of storage commissioned in Australia,
+more than 2017–2024 combined; around 45 GW of grid-scale storage sits in the connection
+queue; the federal home battery program passed 500,000 installations in thirteen months.</p>
+
+<p>The bad news is equally real and you must confront it before an investor does. NEM
+grid-scale battery revenues fell from $121k/MW/yr in January 2026 to $44k/MW/yr in March —
+the lowest since tracking began. Q2 2026 spot averaged $74/MWh, down 47% year-on-year.
+FCAS costs are down 61%. You would be selling forecasting alpha into a customer base whose
+per-MW revenue just fell around 65% in a quarter.</p>
+
+<p>The honest bull case is the ratio, not the level. More assets multiplied by lower revenue
+per asset means more competition for a shrinking optimisation margin — which raises the
+marginal value of forecast skill per MW. When spreads are $200/MWh everyone makes money and
+nobody buys a forecast. When spreads are $60/MWh, capture rate is the whole business. Say
+that explicitly; the naive "big battery boom!" pitch will not survive contact with a
+customer's P&amp;L.</p>
+
+<h3>The wedge</h3>
+
+<p>Not "all five regions, all horizons, a dashboard." That is a product that already exists
+for $149 a month. Start at:</p>
+
+<div class="note">
+  <p><strong>South Australian evening-peak spike probability, 5 minutes to 6 hours ahead</strong>,
+    sold as a calibrated probability plus a machine-generated explanation, benchmarked
+    publicly against AEMO's own forecasts.</p>
+</div>
+
+<p>SA is where the volatility lives (43% of the quarterly average price in under 1% of
+intervals), it is the most constraint-dominated region so the physics is tractable, the
+incumbent's failure mode is documented, the customer set is concentrated and reachable, and
+every spike generates a case study for the scoreboard.</p>
+
+</section>
+
+<hr>
+
+<section id="next">
+<h2><span class="num">07</span>What was built, and what's next</h2>
+
+<div class="built">
+  <span class="tag">Shipped this session</span>
+  <ul>
+    <li>Rebuilt dashboard: symlog price axis, interconnector headroom as a first-class
+      chart, regime flags surfaced, weather at generation coordinates, dark mode.</li>
+    <li>Collector now archives interconnector flows with limits, regime flags, both rooftop
+      PV actual streams, and the vintaged rooftop PV forecast with POE bands.</li>
+    <li>The 1,440 discarded actual rows per call are now archived.</li>
+    <li><code>score.js</code> — the forecast-skill join, with 30-minute trading-interval truth
+      and a persistence baseline.</li>
+    <li>Collection moved from the sleeping laptop to GitHub Actions, with retries, schema-drift
+      guards, and a non-zero exit so a bad run cannot pass as a green tick.</li>
+  </ul>
+</div>
+
+<h3>The first real measurement</h3>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Horizon</th><th class="n">AEMO mean AE</th><th class="n">Persistence</th>
+    <th class="n">Skill</th></tr></thead>
+  <tbody>
+    <tr><td>0–30 min</td><td class="n">$14.7</td><td class="n">$6.8</td>
+      <td class="n neg">−1.17</td></tr>
+    <tr><td>30–60 min</td><td class="n">$13.7</td><td class="n">$12.5</td>
+      <td class="n neg">−0.10</td></tr>
+    <tr><td>1–2 h</td><td class="n">$12.7</td><td class="n">$21.3</td>
+      <td class="n pos">+0.41</td></tr>
+    <tr><td>2–4 h</td><td class="n">$12.6</td><td class="n">$36.2</td>
+      <td class="n pos">+0.65</td></tr>
+    <tr><td>12–24 h</td><td class="n">$27.3</td><td class="n">$60.2</td>
+      <td class="n pos">+0.55</td></tr>
+    <tr><td>24 h+</td><td class="n">$43.9</td><td class="n">$58.9</td>
+      <td class="n pos">+0.25</td></tr>
+  </tbody>
+  <caption>Skill = 1 − MAE<sub>AEMO</sub>/MAE<sub>persistence</sub>. AEMO is <em>worse than
+    assuming nothing changes</em> inside 30 minutes, peaks at 2–4 hours, and carries a
+    systematic +$41.9 bias at 24 h+. Caveat: short-horizon persistence is flattered because
+    it is measured seconds from the target. Caveat two: this window contains no spike, so
+    the mean/median ratio is 1.1–3.0× where published full-year work on SA1 measured about
+    12×. That is proof the archive lacks tails, not proof AEMO is good.</caption>
+</table>
+</div>
+
+<h3>Next, in order</h3>
+
+<ol>
+  <li><strong>Backfill MMSDM.</strong> Everything downstream is starved without tail events.
+    This is the single highest-value action available.</li>
+  <li><strong>Write the problem sentence.</strong> The report's own step 1, still undone.
+    Name the region, the target, the horizons, and the loss function — and specify
+    <em>which</em> AEMO product you are beating, because P5MIN and PREDISPATCH are different
+    things and the report conflates them.</li>
+  <li><strong>Publish the scoreboard.</strong> "How good is AEMO's forecast, really?" — by
+    region, horizon and hour, free, methodology published. You do not need a model of your
+    own to publish this, and it immediately makes you the reference point.</li>
+  <li><strong>Climb the baseline ladder in order</strong> — seasonal naive, then quantile
+    gradient boosting on lagged prices plus AEMO forecast features plus weather. Only then
+    consider deep or foundation models, and only as ensemble members.</li>
+  <li><strong>Then</strong> the dispatch-reproduction gate: can you reproduce yesterday's
+    prices from yesterday's published inputs? If yes, you have a world model. If no, you do
+    not — and it is much better to learn that in month three than month eighteen.</li>
+</ol>
+
+<div class="note">
+  <p><strong>Write the kill criteria down now, while you are still objective.</strong> If at
+    day 90 you cannot beat AEMO's short-horizon forecast at p &lt; 0.05, you do not have a
+    forecasting company — you have a data-infrastructure and forensics company, which is
+    smaller but real. Do not spend year two adding a transformer.</p>
+</div>
+
+</section>
+
+</main>
+</div>
+
+<footer>
+  <p>Figures on market structure, price concentration and battery penetration are from AEMO's
+  Quarterly Energy Dynamics Q1/Q2 2026 and AEMC reliability settings; forecast-skill numbers
+  are measured from this project's own archive and are small-sample. Licensing statements are
+  a starting point, not legal advice — read AEMO's copyright permissions and BoM's terms
+  yourself before commercial launch.</p>
+</footer>
+
+</div>
