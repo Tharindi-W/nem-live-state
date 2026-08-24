@@ -10,7 +10,7 @@ const TYPES = {".html":"text/html;charset=utf-8",".js":"text/javascript",".json"
 
 http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split("?")[0]);
-  if (p === "/") p = "/dashboard.html";
+  if (p === "/") p = "/index.html";
   // strip leading separators before joining, so a crafted path cannot escape ROOT
   let rel = path.normalize(p);
   while (rel.length && (rel[0] === "/" || rel[0] === "\\")) rel = rel.slice(1);

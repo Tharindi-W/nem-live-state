@@ -10,7 +10,7 @@ establish the baseline **before** building any model.
 
 | File | What it does |
 |---|---|
-| `dashboard.html` | Single-file, zero-dependency dashboard. Opens from disk or over http. |
+| `index.html` | Single-file, zero-dependency dashboard. Opens from disk, over http, or on Pages. |
 | `collect.js` | Zero-dependency archiver. Appends new, de-duplicated rows to `data/`. |
 | `score.js` | Joins archived forecast vintages to actuals and scores AEMO against persistence. |
 | `serve.js` | Minimal static server with Range support, for local viewing. |
@@ -25,7 +25,7 @@ node score.js          # how good is AEMO's forecast?
 node serve.js          # then open http://localhost:4173
 ```
 
-The dashboard also works by double-clicking `dashboard.html` — every live feed it
+The dashboard also works by double-clicking `index.html` — every live feed it
 uses sends `Access-Control-Allow-Origin: *`. Serving it over http additionally
 unlocks the local archive views.
 
