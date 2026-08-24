@@ -213,14 +213,24 @@ function csvObjects(text){
    answers Range requests, so this works on the deployed site and not just
    locally. */
 async function tailCSV(url,bytes=700000){
-  const head=await fetch(url,{headers:{Range:"bytes=0-2047"}});
-  if(!head.ok && head.status!==206) throw new Error("HTTP "+head.status);
-  const headerLine=(await head.text()).split("\n",1)[0].trim();
-  const total=+((head.headers.get("content-range")||"").split("/")[1]||0);
-  if(!total || total<=bytes) return csvObjects(await (await fetch(url)).text());
-  const r=await fetch(url,{headers:{Range:`bytes=${total-bytes}-${total-1}`}});
-  const tail=await r.text();
-  return csvObjects(headerLine+"\n"+tail.slice(tail.indexOf("\n")+1));
+  // Every request here is an explicit Range with cache disabled. A bare fetch
+  // after a Range probe gets served the cached 2 KB slice instead of the whole
+  // file, which silently returns a few rows and looks like sparse data rather
+  // than a bug.
+  const probe=await fetch(url,{headers:{Range:"bytes=0-2047"},cache:"no-store"});
+  if(!probe.ok && probe.status!==206) throw new Error("HTTP "+probe.status);
+  const headerLine=(await probe.text()).split("\n",1)[0].trim();
+  const total=+((probe.headers.get("content-range")||"").split("/")[1]||0);
+  if(!total) return csvObjects(await (await fetch(url,{cache:"no-store"})).text());
+
+  const start=total>bytes?total-bytes:0;
+  const r=await fetch(url,{headers:{Range:`bytes=${start}-${total-1}`},cache:"no-store"});
+  if(!r.ok && r.status!==206) throw new Error("HTTP "+r.status);
+  const text=await r.text();
+  // starting mid-file means the first line is a fragment; drop it and re-attach
+  // the real header
+  return start>0 ? csvObjects(headerLine+"\n"+text.slice(text.indexOf("\n")+1))
+                 : csvObjects(text);
 }
 
 /* ===================== forecast skill analytics ===================== */
