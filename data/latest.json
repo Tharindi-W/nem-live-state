@@ -1,77 +1,77 @@
 {
   "dispatch": {
-    "fetched_at": "2026-08-25T23:35:17.131Z",
+    "fetched_at": "2026-08-25T23:53:36.687Z",
     "rows": [
       {
-        "SETTLEMENTDATE": "2026-08-26T09:35:00",
+        "SETTLEMENTDATE": "2026-08-26T09:55:00",
         "REGIONID": "NSW1",
-        "PRICE": 66.53,
+        "PRICE": 70.21915,
         "PRICE_STATUS": "FIRM",
         "APCFLAG": 0,
         "MARKETSUSPENDEDFLAG": 0,
-        "TOTALDEMAND": 8046.86,
-        "NETINTERCHANGE": -399.34,
-        "SCHEDULEDGENERATION": 4968.98349,
-        "SEMISCHEDULEDGENERATION": 2675.87651,
-        "INTERCONNECTORFLOWS": "[{\"name\":\"N-Q-MNSP1\", \"value\":-9.00000, \"exportlimit\":67.60010, \"importlimit\":-92.39990}, {\"name\":\"NSW1-QLD1\", \"value\":-221.00000, \"exportlimit\":626.45468, \"importlimit\":-1060.47332}, {\"name\":\"VIC1-NSW1\", \"value\":171.99946, \"exportlimit\":171.99947, \"importlimit\":-817.78804}]"
+        "TOTALDEMAND": 7926.71,
+        "NETINTERCHANGE": -156,
+        "SCHEDULEDGENERATION": 4870.08172,
+        "SEMISCHEDULEDGENERATION": 2900.79828,
+        "INTERCONNECTORFLOWS": "[{\"name\":\"N-Q-MNSP1\", \"value\":0.00000, \"exportlimit\":68.54585, \"importlimit\":-82.39996}, {\"name\":\"NSW1-QLD1\", \"value\":-136.70566, \"exportlimit\":672.08264, \"importlimit\":-1146.85750}, {\"name\":\"VIC1-NSW1\", \"value\":19.12434, \"exportlimit\":19.12433, \"importlimit\":-838.79925}]"
       },
       {
-        "SETTLEMENTDATE": "2026-08-26T09:35:00",
+        "SETTLEMENTDATE": "2026-08-26T09:55:00",
         "REGIONID": "QLD1",
-        "PRICE": 64.69,
+        "PRICE": 69.77,
         "PRICE_STATUS": "FIRM",
         "APCFLAG": 0,
         "MARKETSUSPENDEDFLAG": 0,
-        "TOTALDEMAND": 6422.85,
-        "NETINTERCHANGE": 230.57,
-        "SCHEDULEDGENERATION": 4384.18091,
-        "SEMISCHEDULEDGENERATION": 2268.66909,
-        "INTERCONNECTORFLOWS": "[{\"name\":\"N-Q-MNSP1\", \"value\":-9.00000, \"exportlimit\":67.60010, \"importlimit\":-92.39990}, {\"name\":\"NSW1-QLD1\", \"value\":-221.00000, \"exportlimit\":626.45468, \"importlimit\":-1060.47332}]"
+        "TOTALDEMAND": 6609.81,
+        "NETINTERCHANGE": 136.22,
+        "SCHEDULEDGENERATION": 4428.9865,
+        "SEMISCHEDULEDGENERATION": 2317.5335,
+        "INTERCONNECTORFLOWS": "[{\"name\":\"N-Q-MNSP1\", \"value\":0.00000, \"exportlimit\":68.54585, \"importlimit\":-82.39996}, {\"name\":\"NSW1-QLD1\", \"value\":-136.70566, \"exportlimit\":672.08264, \"importlimit\":-1146.85750}]"
       },
       {
-        "SETTLEMENTDATE": "2026-08-26T09:35:00",
+        "SETTLEMENTDATE": "2026-08-26T09:55:00",
         "REGIONID": "SA1",
-        "PRICE": 130.44,
+        "PRICE": 85.44,
         "PRICE_STATUS": "FIRM",
         "APCFLAG": 0,
         "MARKETSUSPENDEDFLAG": 0,
-        "TOTALDEMAND": 1295.3,
-        "NETINTERCHANGE": -213.4,
-        "SCHEDULEDGENERATION": 651.30484,
-        "SEMISCHEDULEDGENERATION": 429.86516,
-        "INTERCONNECTORFLOWS": "[{\"name\":\"V-SA\", \"value\":214.12927, \"exportlimit\":214.12928, \"importlimit\":-180.67236}, {\"name\":\"V-S-MNSP1\", \"value\":0.00000, \"exportlimit\":0.00000, \"importlimit\":0.00000}]"
+        "TOTALDEMAND": 1202.72,
+        "NETINTERCHANGE": -224.7,
+        "SCHEDULEDGENERATION": 484.32043,
+        "SEMISCHEDULEDGENERATION": 493.30957,
+        "INTERCONNECTORFLOWS": "[{\"name\":\"V-SA\", \"value\":225.08610, \"exportlimit\":225.08610, \"importlimit\":-176.29466}, {\"name\":\"V-S-MNSP1\", \"value\":0.00000, \"exportlimit\":0.00000, \"importlimit\":0.00000}]"
       },
       {
-        "SETTLEMENTDATE": "2026-08-26T09:35:00",
+        "SETTLEMENTDATE": "2026-08-26T09:55:00",
         "REGIONID": "TAS1",
-        "PRICE": 88.24,
+        "PRICE": 32.06,
         "PRICE_STATUS": "FIRM",
         "APCFLAG": 0,
         "MARKETSUSPENDEDFLAG": 0,
-        "TOTALDEMAND": 1129.03,
-        "NETINTERCHANGE": 0,
-        "SCHEDULEDGENERATION": 971.46433,
-        "SEMISCHEDULEDGENERATION": 157.56567,
-        "INTERCONNECTORFLOWS": "[{\"name\":\"T-V-MNSP1\", \"value\":0.00000, \"exportlimit\":281.79883, \"importlimit\":0.00000}]"
+        "TOTALDEMAND": 1095.15,
+        "NETINTERCHANGE": -338.37,
+        "SCHEDULEDGENERATION": 595.24167,
+        "SEMISCHEDULEDGENERATION": 161.53833,
+        "INTERCONNECTORFLOWS": "[{\"name\":\"T-V-MNSP1\", \"value\":-338.36760, \"exportlimit\":-163.19531, \"importlimit\":-429.76822}]"
       },
       {
-        "SETTLEMENTDATE": "2026-08-26T09:35:00",
+        "SETTLEMENTDATE": "2026-08-26T09:55:00",
         "REGIONID": "VIC1",
-        "PRICE": 20.68,
+        "PRICE": 30.6411,
         "PRICE_STATUS": "FIRM",
         "APCFLAG": 0,
         "MARKETSUSPENDEDFLAG": 0,
-        "TOTALDEMAND": 5891.05,
-        "NETINTERCHANGE": 390.58,
-        "SCHEDULEDGENERATION": 4291.00454,
-        "SEMISCHEDULEDGENERATION": 1986.17546,
-        "INTERCONNECTORFLOWS": "[{\"name\":\"T-V-MNSP1\", \"value\":0.00000, \"exportlimit\":281.79883, \"importlimit\":0.00000}, {\"name\":\"VIC1-NSW1\", \"value\":171.99946, \"exportlimit\":171.99947, \"importlimit\":-817.78804}, {\"name\":\"V-SA\", \"value\":214.12927, \"exportlimit\":214.12928, \"importlimit\":-180.67236}, {\"name\":\"V-S-MNSP1\", \"value\":0.00000, \"exportlimit\":0.00000, \"importlimit\":0.00000}]"
+        "TOTALDEMAND": 5653.1,
+        "NETINTERCHANGE": 587.52,
+        "SCHEDULEDGENERATION": 4291.00112,
+        "SEMISCHEDULEDGENERATION": 1944.67888,
+        "INTERCONNECTORFLOWS": "[{\"name\":\"T-V-MNSP1\", \"value\":-338.36760, \"exportlimit\":-163.19531, \"importlimit\":-429.76822}, {\"name\":\"VIC1-NSW1\", \"value\":19.12434, \"exportlimit\":19.12433, \"importlimit\":-838.79925}, {\"name\":\"V-SA\", \"value\":225.08610, \"exportlimit\":225.08610, \"importlimit\":-176.29466}, {\"name\":\"V-S-MNSP1\", \"value\":0.00000, \"exportlimit\":0.00000, \"importlimit\":0.00000}]"
       }
     ]
   },
   "predispatch": {
-    "fetched_at": "2026-08-25T23:35:18.612Z",
-    "issue": "2026-08-26T09:35:00",
+    "fetched_at": "2026-08-25T23:53:38.025Z",
+    "issue": "2026-08-26T09:55:00",
     "n_actual": 1440,
     "n_forecast": 185,
     "forecast": [
@@ -2298,7 +2298,7 @@
     ]
   },
   "wem": {
-    "fetched_at": "2026-08-25T23:35:21.695Z",
+    "fetched_at": "2026-08-25T23:53:39.771Z",
     "latest": {
       "Dispatch Interval": "25/08/2026 07:55:00",
       "Energy Clearing Price": "109.34",
@@ -2311,11 +2311,11 @@
       "Extracted At": "25/08/2026 08:21:51"
     }
   },
-  "_collected_at": "2026-08-25T23:35:27.790Z",
+  "_collected_at": "2026-08-25T23:53:43.875Z",
   "rooftop_actual": {
-    "fetched_at": "2026-08-25T23:35:21.696Z",
-    "files": 2,
-    "rows": 10
+    "fetched_at": "2026-08-25T23:53:39.772Z",
+    "files": 0,
+    "rows": 0
   },
   "rooftop_forecast": {
     "fetched_at": "2026-08-25T23:35:27.507Z",
