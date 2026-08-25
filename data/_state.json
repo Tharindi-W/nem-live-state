@@ -1,9 +1,9 @@
 {
   "dispatch": {
-    "lastSD": "2026-08-25T16:20:00"
+    "lastSD": "2026-08-25T17:15:00"
   },
   "predispatch": {
-    "lastIssue": "2026-08-25T16:20:00"
+    "lastIssue": "2026-08-25T17:15:00"
   },
   "wem": {
     "lastInterval": "25/08/2026 07:55:00"
@@ -12,12 +12,12 @@
     "lastFile": "PUBLIC_ROOFTOP_PV_ACTUAL_SATELLITE_20260824093000_0000000534188881.zip"
   },
   "rooftop_forecast": {
-    "lastFile": "PUBLIC_ROOFTOP_PV_FORECAST_20260825160000_0000000534398872.zip"
+    "lastFile": "PUBLIC_ROOFTOP_PV_FORECAST_20260825170000_0000000534405971.zip"
   },
   "rooftop_actual_satellite": {
-    "lastFile": "PUBLIC_ROOFTOP_PV_ACTUAL_SATELLITE_20260825160000_0000000534398876.zip"
+    "lastFile": "PUBLIC_ROOFTOP_PV_ACTUAL_SATELLITE_20260825170000_0000000534405975.zip"
   },
   "rooftop_actual_measurement": {
-    "lastFile": "PUBLIC_ROOFTOP_PV_ACTUAL_MEASUREMENT_20260825160000_0000000534398874.zip"
+    "lastFile": "PUBLIC_ROOFTOP_PV_ACTUAL_MEASUREMENT_20260825170000_0000000534405973.zip"
   }
 }
